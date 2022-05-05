@@ -326,7 +326,7 @@ func TestGenerate2(t *testing.T) {
 		got := dm.Generate()
 		want := mysql.ErrInvalidType
 		if got == nil {
-			t.Fatal("open file error did not occure")
+			t.Fatal("parse error did not occure")
 		}
 		if !errors.As(got, &want) {
 			t.Errorf("mismatch want:%v, got:%v", want, got)

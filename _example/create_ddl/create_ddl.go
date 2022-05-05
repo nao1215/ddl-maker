@@ -56,7 +56,10 @@ func main() {
 		ex.Bookmark{},
 	}
 
-	dm.AddStruct(structs...)
+	if err := dm.AddStruct(structs...); err != nil {
+		log.Println(err.Error())
+		return
+	}
 
 	err = dm.Generate()
 	if err != nil {

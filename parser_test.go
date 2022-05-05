@@ -131,7 +131,9 @@ func TestDDLMaker_parse(t *testing.T) {
 			Charset: "dummy",
 		}
 
-		dm.AddStruct(&T2{})
+		if err := dm.AddStruct(&T2{}); err != nil {
+			t.Fatal(err)
+		}
 
 		got := dm.parse()
 		if got != nil {

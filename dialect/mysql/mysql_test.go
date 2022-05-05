@@ -302,3 +302,33 @@ func TestWithDeleteForeignKeyOption(t *testing.T) {
 		})
 	}
 }
+
+func TestMySQL_HeaderTemplate(t *testing.T) {
+	type fields struct {
+		Engine  string
+		Charset string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{
+			name:   "[Normal]",
+			fields: fields{},
+			want: `SET foreign_key_checks=0;
+`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mysql := MySQL{
+				Engine:  tt.fields.Engine,
+				Charset: tt.fields.Charset,
+			}
+			if got := mysql.HeaderTemplate(); got != tt.want {
+				t.Errorf("MySQL.HeaderTemplate() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

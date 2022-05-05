@@ -156,15 +156,15 @@ CREATE TABLE %s (
 		t.Fatal("error new maker", err)
 	}
 
-	err = dm.AddStruct(&TestOne{})
-	if err != nil {
+	if err = dm.AddStruct(&TestOne{}); err != nil {
 		t.Fatal("error add struct", err)
 	}
-	dm.parse()
+	if err = dm.parse(); err != nil {
+		t.Fatal(err)
+	}
 
 	var ddl1 bytes.Buffer
-	err = dm.generate(&ddl1)
-	if err != nil {
+	if err = dm.generate(&ddl1); err != nil {
 		t.Fatal("error generate ddl", err)
 	}
 
@@ -184,15 +184,15 @@ CREATE TABLE %s (
 		t.Fatal(err)
 	}
 
-	err = dm2.AddStruct(&TestTwo{})
-	if err != nil {
+	if err = dm2.AddStruct(&TestTwo{}); err != nil {
 		t.Fatal("error add pointer struct", err)
 	}
-	dm2.parse()
+	if err = dm2.parse(); err != nil {
+		t.Fatal(err)
+	}
 
 	var ddl2 bytes.Buffer
-	err = dm2.generate(&ddl2)
-	if err != nil {
+	if err = dm2.generate(&ddl2); err != nil {
 		t.Fatal("error generate ddl", err)
 	}
 

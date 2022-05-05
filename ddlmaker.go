@@ -77,7 +77,10 @@ func (dm *DDLMaker) AddStruct(ss ...interface{}) error {
 // Generate ddl file
 func (dm *DDLMaker) Generate() error {
 	log.Printf("start generate %s \n", dm.config.OutFilePath)
-	dm.parse()
+	err := dm.parse()
+	if err != nil {
+		return err
+	}
 
 	file, err := os.Create(dm.config.OutFilePath)
 	if err != nil {

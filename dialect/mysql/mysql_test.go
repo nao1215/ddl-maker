@@ -236,3 +236,40 @@ func Test_varbinary(t *testing.T) {
 		})
 	}
 }
+
+func TestForeignKey_ToSQL(t *testing.T) {
+	type fields struct {
+		foreignColumns     []string
+		referenceTableName string
+		referenceColumns   []string
+		updateOption       string
+		deleteOption       string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{
+			name: "[Normal] Add delete option",
+			fields: fields{
+				deleteOption: "cascade",
+			},
+			want: "FOREIGN KEY () REFERENCES `` () ON DELETE cascade",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fk := ForeignKey{
+				foreignColumns:     tt.fields.foreignColumns,
+				referenceTableName: tt.fields.referenceTableName,
+				referenceColumns:   tt.fields.referenceColumns,
+				updateOption:       tt.fields.updateOption,
+				deleteOption:       tt.fields.deleteOption,
+			}
+			if got := fk.ToSQL(); got != tt.want {
+				t.Errorf("ForeignKey.ToSQL() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

@@ -3,7 +3,7 @@
 [![codecov](https://codecov.io/gh/nao1215/ddl-maker/branch/main/graph/badge.svg?token=DO641K2SOW)](https://codecov.io/gh/nao1215/ddl-maker)
 [![Go Reference](https://pkg.go.dev/badge/github.com/nao1215/ddl-maker.svg)](https://pkg.go.dev/github.com/nao1215/ddl-maker)
 [![Go Report Card](https://goreportcard.com/badge/github.com/nao1215/ddl-maker)](https://goreportcard.com/report/github.com/nao1215/ddl-maker)  
-# ddl-maker (kayac/ddl-makerをフォークした理由)
+# ddl-makerとは
 ddl-makerは、Go言語の構造体からddl（SQLファイル）を生成します。現在は、MySQLのみをサポートしています。オリジナルコードは、[kayac/ddl-maker](https://github.com/kayac/ddl-maker)であり、本リポジトリはフォーク版です。kayac/ddl-makerは、積極的な更新がされてきませんでした。私は、機能追加、テスト追加、ドキュメント改善を検討していました。しかし、それらの変更がマージされるかどうかは不確かでした。そこで、私はフォーク版で開発を進めることを決め、独自の機能追加を始めました。
 
 # 使い方

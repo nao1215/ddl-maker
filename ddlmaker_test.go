@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"database/sql"
 	"fmt"
+	"os"
 	"testing"
 	"time"
 
@@ -170,6 +171,103 @@ CREATE TABLE %s (
 	}
 }
 
+func TestGenerate2(t *testing.T) {
+	t.Run("[Normal] generate ddl file", func(t *testing.T) {
+		dm, err := New(Config{
+			OutFilePath: "./testdata/test.sql",
+			DB: DBConfig{
+				Driver:  "mysql",
+				Engine:  "InnoDB",
+				Charset: "utf8mb4",
+			},
+		})
+		if err != nil {
+			t.Fatal("error new maker", err)
+		}
+		defer os.Remove("./testdata/test.sql")
+
+		err = dm.AddStruct(&TestOne{})
+		if err != nil {
+			t.Fatal("error add struct", err)
+		}
+		dm.parse()
+
+		err = dm.Generate()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		got, err := os.ReadFile("./testdata/test.sql")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		want, err := os.ReadFile("./testdata/golden.sql")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if string(want) != string(got) {
+			t.Errorf("mismatch want:%s, got:%s", string(want), string(got))
+		}
+	})
+
+	t.Run("[Error] open file error", func(t *testing.T) {
+		dm, err := New(Config{
+			OutFilePath: "",
+			DB: DBConfig{
+				Driver:  "mysql",
+				Engine:  "InnoDB",
+				Charset: "utf8mb4",
+			},
+		})
+		if err != nil {
+			t.Fatal("error new maker", err)
+		}
+
+		got := dm.Generate()
+		want := "error create ddl file: open : no such file or directory"
+		if got == nil {
+			t.Fatal("open file error did not occure")
+		}
+		if want != got.Error() {
+			t.Errorf("mismatch want:%s, got:%s", want, got.Error())
+		}
+	})
+
+	t.Run("[Error] generate ddl error", func(t *testing.T) {
+		dm, err := New(Config{
+			OutFilePath: "./testdata/test.sql",
+			DB: DBConfig{
+				Driver:  "mysql",
+				Engine:  "InnoDB",
+				Charset: "utf8mb4",
+			},
+		})
+		if err != nil {
+			t.Fatal("error new maker", err)
+		}
+		defer os.Remove("./testdata/test.sql")
+
+		dm.Dialect = &mock.DummySQL{
+			Engine:  "dummy",
+			Charset: "dummy",
+			MockHeaderTemplate: func() string {
+				return "{{"
+			},
+		}
+
+		got := dm.Generate()
+		want := "error generate: error parse header template: template: header:1: unclosed action"
+		if got == nil {
+			t.Fatal("open file error did not occure")
+		}
+		if want != got.Error() {
+			t.Errorf("mismatch want:%s, got:%s", want, got.Error())
+		}
+	})
+}
+
 func TestDDLMaker_generate(t *testing.T) {
 	t.Run("[Error] parse header tamplate error", func(t *testing.T) {
 		dm := DDLMaker{}
@@ -242,4 +340,33 @@ func TestDDLMaker_generate(t *testing.T) {
 			t.Errorf("mismatch want:%s, got:%s", want, got.Error())
 		}
 	})
+}
+
+func TestDDLMaker_Generate(t *testing.T) {
+	type fields struct {
+		config  Config
+		Dialect dialect.Dialect
+		Structs []interface{}
+		Tables  []dialect.Table
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			dm := &DDLMaker{
+				config:  tt.fields.config,
+				Dialect: tt.fields.Dialect,
+				Structs: tt.fields.Structs,
+				Tables:  tt.fields.Tables,
+			}
+			if err := dm.Generate(); (err != nil) != tt.wantErr {
+				t.Errorf("DDLMaker.Generate() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
 }

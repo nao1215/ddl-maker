@@ -2,6 +2,7 @@
 [![reviewdog](https://github.com/nao1215/ddl-maker/actions/workflows/reviewdog.yml/badge.svg)](https://github.com/nao1215/ddl-maker/actions/workflows/reviewdog.yml)
 [![codecov](https://codecov.io/gh/nao1215/ddl-maker/branch/main/graph/badge.svg?token=YLj6wiKpMS)](https://codecov.io/gh/nao1215/ddl-maker)
 [![Go Reference](https://pkg.go.dev/badge/github.com/nao1215/ddl-maker.svg)](https://pkg.go.dev/github.com/nao1215/ddl-maker)
+![GitHub](https://img.shields.io/github/license/nao1215/ddl-maker)
 [![Go Report Card](https://goreportcard.com/badge/github.com/nao1215/ddl-maker)](https://goreportcard.com/report/github.com/nao1215/ddl-maker)  
 [[日本語](doc/ja/README.md)]
 # What is ddl-maker

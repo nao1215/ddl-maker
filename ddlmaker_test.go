@@ -7,30 +7,30 @@ import (
 	"testing"
 	"time"
 
-	"github.com/nao1215/ddl-maker/dialect/mysql"
 	"github.com/nao1215/ddl-maker/dialect"
+	"github.com/nao1215/ddl-maker/dialect/mysql"
 )
 
-type Test1 struct {
+type TestOne struct {
 	ID        uint64
 	Name      string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
 
-func (t1 Test1) PrimaryKey() dialect.PrimaryKey {
+func (t1 TestOne) PrimaryKey() dialect.PrimaryKey {
 	return mysql.AddPrimaryKey("id")
 }
 
-type Test2 struct {
+type TestTwo struct {
 	ID        uint64
-	Test1ID   uint64
+	TestOneID uint64
 	Comment   sql.NullString `ddl:"null"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
 
-func (t2 *Test2) PrimaryKey() dialect.PrimaryKey {
+func (t2 *TestTwo) PrimaryKey() dialect.PrimaryKey {
 	return mysql.AddPrimaryKey("id", "created_at")
 }
 
@@ -70,12 +70,12 @@ func TestAddStruct(t *testing.T) {
 		t.Fatal("nil is not support")
 	}
 
-	dm.AddStruct(Test1{}, Test2{})
+	dm.AddStruct(TestOne{}, TestTwo{})
 	if len(dm.Structs) != 2 {
 		t.Fatal("[error] add stuct")
 	}
 
-	err = dm.AddStruct(Test1{})
+	err = dm.AddStruct(TestOne{})
 	if err != nil {
 		t.Fatal("[error] add duplicate struct")
 	}
@@ -94,7 +94,7 @@ CREATE TABLE %s (
     PRIMARY KEY (%s)
 ) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4;
 
-%s`, m.HeaderTemplate(), m.Quote("test1"), m.Quote("test1"), m.Quote("id"), m.Quote("name"), m.Quote("created_at"), m.Quote("updated_at"), m.Quote("id"), m.FooterTemplate())
+%s`, m.HeaderTemplate(), m.Quote("test_one"), m.Quote("test_one"), m.Quote("id"), m.Quote("name"), m.Quote("created_at"), m.Quote("updated_at"), m.Quote("id"), m.FooterTemplate())
 
 	generatedDDL2 := fmt.Sprintf(`%s
 DROP TABLE IF EXISTS %s;
@@ -108,7 +108,7 @@ CREATE TABLE %s (
     PRIMARY KEY (%s, %s)
 ) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4;
 
-%s`, m.HeaderTemplate(), m.Quote("test2"), m.Quote("test2"), m.Quote("id"), m.Quote("test1_id"), m.Quote("comment"), m.Quote("created_at"), m.Quote("updated_at"), m.Quote("id"), m.Quote("created_at"), m.FooterTemplate())
+%s`, m.HeaderTemplate(), m.Quote("test_two"), m.Quote("test_two"), m.Quote("id"), m.Quote("test_one_id"), m.Quote("comment"), m.Quote("created_at"), m.Quote("updated_at"), m.Quote("id"), m.Quote("created_at"), m.FooterTemplate())
 
 	dm, err := New(Config{
 		DB: DBConfig{
@@ -121,7 +121,7 @@ CREATE TABLE %s (
 		t.Fatal("error new maker", err)
 	}
 
-	err = dm.AddStruct(&Test1{})
+	err = dm.AddStruct(&TestOne{})
 	if err != nil {
 		t.Fatal("error add struct", err)
 	}
@@ -146,7 +146,7 @@ CREATE TABLE %s (
 		},
 	})
 
-	err = dm2.AddStruct(&Test2{})
+	err = dm2.AddStruct(&TestTwo{})
 	if err != nil {
 		t.Fatal("error add pointer struct", err)
 	}

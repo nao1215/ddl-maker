@@ -69,6 +69,10 @@ var ForeignKeyOptionNoAction ForeignKeyOptionType = "NO ACTION"
 // ForeignKeyOptionSetDefault SET DEFAULT
 var ForeignKeyOptionSetDefault ForeignKeyOptionType = "SET DEFAULT"
 
+func (fkopt ForeignKeyOptionType) String() string {
+	return string(fkopt)
+}
+
 // ForeignKey XXX
 type ForeignKey struct {
 	foreignColumns     []string

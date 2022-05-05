@@ -3,6 +3,7 @@ package mysql
 import (
 	"errors"
 	"fmt"
+	"reflect"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -406,6 +407,516 @@ CREATE TABLE {{ .Name }} (
 			got := mysql.TableTemplate()
 			if diff := cmp.Diff(tt.want, got); diff != "" {
 				t.Errorf("Compare value is mismatch (-want +got):%s\n", diff)
+			}
+		})
+	}
+}
+
+func TestMySQL_Quote(t *testing.T) {
+	type fields struct {
+		Engine  string
+		Charset string
+	}
+	type args struct {
+		s string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   string
+	}{
+		{
+			name:   "[Normal] return quoted string",
+			fields: fields{},
+			args:   args{s: "test"},
+			want:   "`test`",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mysql := MySQL{
+				Engine:  tt.fields.Engine,
+				Charset: tt.fields.Charset,
+			}
+			if got := mysql.Quote(tt.args.s); got != tt.want {
+				t.Errorf("MySQL.Quote() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestIndex_Name(t *testing.T) {
+	type fields struct {
+		columns []string
+		name    string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{
+			name: "[Normal] return index name",
+			fields: fields{
+				columns: []string{},
+				name:    "index name",
+			},
+			want: "index name",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			i := Index{
+				columns: tt.fields.columns,
+				name:    tt.fields.name,
+			}
+			if got := i.Name(); got != tt.want {
+				t.Errorf("Index.Name() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestIndex_Columns(t *testing.T) {
+	type fields struct {
+		columns []string
+		name    string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   []string
+	}{
+		{
+			name: "[Normal] return columns",
+			fields: fields{
+				columns: []string{"aa", "bb", "cc"},
+				name:    "index name",
+			},
+			want: []string{"aa", "bb", "cc"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			i := Index{
+				columns: tt.fields.columns,
+				name:    tt.fields.name,
+			}
+			if got := i.Columns(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Index.Columns() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestUniqueIndex_Name(t *testing.T) {
+	type fields struct {
+		columns []string
+		name    string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{
+			name: "[Normal] return index name",
+			fields: fields{
+				columns: []string{"aa", "bb", "cc"},
+				name:    "uniq index name",
+			},
+			want: "uniq index name",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ui := UniqueIndex{
+				columns: tt.fields.columns,
+				name:    tt.fields.name,
+			}
+			if got := ui.Name(); got != tt.want {
+				t.Errorf("UniqueIndex.Name() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestUniqueIndex_Columns(t *testing.T) {
+	type fields struct {
+		columns []string
+		name    string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   []string
+	}{
+		{
+			name: "[Normal] return columns",
+			fields: fields{
+				columns: []string{"aa", "bb", "cc"},
+				name:    "index name",
+			},
+			want: []string{"aa", "bb", "cc"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ui := UniqueIndex{
+				columns: tt.fields.columns,
+				name:    tt.fields.name,
+			}
+			if got := ui.Columns(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("UniqueIndex.Columns() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestFullTextIndex_Name(t *testing.T) {
+	type fields struct {
+		columns []string
+		name    string
+		parser  string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{
+			name: "[Normal] return index name",
+			fields: fields{
+				columns: []string{"aa", "bb", "cc"},
+				name:    "index name",
+				parser:  "parser",
+			},
+			want: "index name",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fi := FullTextIndex{
+				columns: tt.fields.columns,
+				name:    tt.fields.name,
+				parser:  tt.fields.parser,
+			}
+			if got := fi.Name(); got != tt.want {
+				t.Errorf("FullTextIndex.Name() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestFullTextIndex_Columns(t *testing.T) {
+	type fields struct {
+		columns []string
+		name    string
+		parser  string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   []string
+	}{
+		{
+			name: "[Normal] return columns",
+			fields: fields{
+				columns: []string{"aa", "bb", "cc"},
+				name:    "index name",
+				parser:  "parser",
+			},
+			want: []string{"aa", "bb", "cc"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fi := FullTextIndex{
+				columns: tt.fields.columns,
+				name:    tt.fields.name,
+				parser:  tt.fields.parser,
+			}
+			if got := fi.Columns(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("FullTextIndex.Columns() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestSpatialIndex_Name(t *testing.T) {
+	type fields struct {
+		columns []string
+		name    string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{
+			name: "[Normal] return index name",
+			fields: fields{
+				columns: []string{"aa", "bb", "cc"},
+				name:    "index name",
+			},
+			want: "index name",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			si := SpatialIndex{
+				columns: tt.fields.columns,
+				name:    tt.fields.name,
+			}
+			if got := si.Name(); got != tt.want {
+				t.Errorf("SpatialIndex.Name() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestSpatialIndex_Columns(t *testing.T) {
+	type fields struct {
+		columns []string
+		name    string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   []string
+	}{
+		{
+			name: "[Normal] return columns",
+			fields: fields{
+				columns: []string{"aa", "bb", "cc"},
+				name:    "index name",
+			},
+			want: []string{"aa", "bb", "cc"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			si := SpatialIndex{
+				columns: tt.fields.columns,
+				name:    tt.fields.name,
+			}
+			if got := si.Columns(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("SpatialIndex.Columns() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestPrimaryKey_Columns(t *testing.T) {
+	type fields struct {
+		columns []string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   []string
+	}{
+		{
+			name: "[Normal] return columns",
+			fields: fields{
+				columns: []string{"aa", "bb", "cc"},
+			},
+			want: []string{"aa", "bb", "cc"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			pk := PrimaryKey{
+				columns: tt.fields.columns,
+			}
+			if got := pk.Columns(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("PrimaryKey.Columns() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestForeignKey_ForeignColumns(t *testing.T) {
+	type fields struct {
+		foreignColumns     []string
+		referenceTableName string
+		referenceColumns   []string
+		updateOption       string
+		deleteOption       string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   []string
+	}{
+		{
+			name: "[Normal] return columns",
+			fields: fields{
+				foreignColumns: []string{"aa", "bb", "cc"},
+			},
+			want: []string{"aa", "bb", "cc"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fk := ForeignKey{
+				foreignColumns:     tt.fields.foreignColumns,
+				referenceTableName: tt.fields.referenceTableName,
+				referenceColumns:   tt.fields.referenceColumns,
+				updateOption:       tt.fields.updateOption,
+				deleteOption:       tt.fields.deleteOption,
+			}
+			if got := fk.ForeignColumns(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("ForeignKey.ForeignColumns() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestForeignKey_ReferenceTableName(t *testing.T) {
+	type fields struct {
+		foreignColumns     []string
+		referenceTableName string
+		referenceColumns   []string
+		updateOption       string
+		deleteOption       string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{
+			name: "[Normal] return table name",
+			fields: fields{
+				referenceTableName: "table",
+			},
+			want: "table",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fk := ForeignKey{
+				foreignColumns:     tt.fields.foreignColumns,
+				referenceTableName: tt.fields.referenceTableName,
+				referenceColumns:   tt.fields.referenceColumns,
+				updateOption:       tt.fields.updateOption,
+				deleteOption:       tt.fields.deleteOption,
+			}
+			if got := fk.ReferenceTableName(); got != tt.want {
+				t.Errorf("ForeignKey.ReferenceTableName() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestForeignKey_ReferenceColumns(t *testing.T) {
+	type fields struct {
+		foreignColumns     []string
+		referenceTableName string
+		referenceColumns   []string
+		updateOption       string
+		deleteOption       string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   []string
+	}{
+		{
+			name: "[Normal] return referaence columns",
+			fields: fields{
+				referenceColumns: []string{"aa", "bb", "cc"},
+			},
+			want: []string{"aa", "bb", "cc"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fk := ForeignKey{
+				foreignColumns:     tt.fields.foreignColumns,
+				referenceTableName: tt.fields.referenceTableName,
+				referenceColumns:   tt.fields.referenceColumns,
+				updateOption:       tt.fields.updateOption,
+				deleteOption:       tt.fields.deleteOption,
+			}
+			if got := fk.ReferenceColumns(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("ForeignKey.ReferenceColumns() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestForeignKey_UpdateOption(t *testing.T) {
+	type fields struct {
+		foreignColumns     []string
+		referenceTableName string
+		referenceColumns   []string
+		updateOption       string
+		deleteOption       string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{
+			name: "[Normal] return update option",
+			fields: fields{
+				updateOption: ForeignKeyOptionSetDefault.String(),
+			},
+			want: ForeignKeyOptionSetDefault.String(),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fk := ForeignKey{
+				foreignColumns:     tt.fields.foreignColumns,
+				referenceTableName: tt.fields.referenceTableName,
+				referenceColumns:   tt.fields.referenceColumns,
+				updateOption:       tt.fields.updateOption,
+				deleteOption:       tt.fields.deleteOption,
+			}
+			if got := fk.UpdateOption(); got != tt.want {
+				t.Errorf("ForeignKey.UpdateOption() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestForeignKey_DeleteOption(t *testing.T) {
+	type fields struct {
+		foreignColumns     []string
+		referenceTableName string
+		referenceColumns   []string
+		updateOption       string
+		deleteOption       string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{
+			name: "[Normal] return delete option",
+			fields: fields{
+				deleteOption: ForeignKeyOptionSetDefault.String(),
+			},
+			want: ForeignKeyOptionSetDefault.String(),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fk := ForeignKey{
+				foreignColumns:     tt.fields.foreignColumns,
+				referenceTableName: tt.fields.referenceTableName,
+				referenceColumns:   tt.fields.referenceColumns,
+				updateOption:       tt.fields.updateOption,
+				deleteOption:       tt.fields.deleteOption,
+			}
+			if got := fk.DeleteOption(); got != tt.want {
+				t.Errorf("ForeignKey.DeleteOption() = %v, want %v", got, tt.want)
 			}
 		})
 	}

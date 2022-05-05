@@ -3,11 +3,13 @@ package ddlmaker
 import (
 	"bytes"
 	"database/sql"
+	"errors"
 	"fmt"
 	"os"
 	"testing"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/nao1215/ddl-maker/dialect"
 	"github.com/nao1215/ddl-maker/dialect/mock"
 	"github.com/nao1215/ddl-maker/dialect/mysql"
@@ -30,6 +32,11 @@ type TestTwo struct {
 	Comment   sql.NullString `ddl:"null"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
+}
+
+type unknown int
+type TestThree struct {
+	ID unknown
 }
 
 func (t2 *TestTwo) PrimaryKey() dialect.PrimaryKey {
@@ -216,14 +223,14 @@ func TestGenerate2(t *testing.T) {
 		}
 		defer os.Remove("./testdata/test.sql")
 
-		err = dm.AddStruct(&TestOne{})
-		if err != nil {
+		if err = dm.AddStruct(&TestOne{}); err != nil {
 			t.Fatal("error add struct", err)
 		}
-		dm.parse()
+		if err = dm.parse(); err != nil {
+			t.Fatal(err)
+		}
 
-		err = dm.Generate()
-		if err != nil {
+		if err = dm.Generate(); err != nil {
 			t.Fatal(err)
 		}
 
@@ -237,8 +244,8 @@ func TestGenerate2(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if string(want) != string(got) {
-			t.Errorf("mismatch want:%s, got:%s", string(want), string(got))
+		if diff := cmp.Diff(string(want), string(got)); diff != "" {
+			t.Errorf("Compare value is mismatch (-want +got):%s\n", diff)
 		}
 	})
 
@@ -294,6 +301,35 @@ func TestGenerate2(t *testing.T) {
 		}
 		if want != got.Error() {
 			t.Errorf("mismatch want:%s, got:%s", want, got.Error())
+		}
+	})
+
+	t.Run("[Error] parse error", func(t *testing.T) {
+		dm, err := New(Config{
+			OutFilePath: "./testdata/test.sql",
+			DB: DBConfig{
+				Driver:  "mysql",
+				Engine:  "InnoDB",
+				Charset: "utf8mb4",
+			},
+		})
+		if err != nil {
+			t.Fatal("error new maker", err)
+		}
+		defer os.Remove("./testdata/test.sql")
+
+		err = dm.AddStruct(&TestThree{})
+		if err != nil {
+			t.Fatal("error add struct", err)
+		}
+
+		got := dm.Generate()
+		want := mysql.ErrInvalidType
+		if got == nil {
+			t.Fatal("open file error did not occure")
+		}
+		if !errors.As(got, &want) {
+			t.Errorf("mismatch want:%v, got:%v", want, got)
 		}
 	})
 }

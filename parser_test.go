@@ -126,7 +126,7 @@ func TestParseTable(t *testing.T) {
 func TestDDLMaker_parse(t *testing.T) {
 	t.Run("[Normal] can parse ignore field and pointer field", func(t *testing.T) {
 		dm := DDLMaker{}
-		dm.Dialect = &mock.DummySQL{
+		dm.Dialect = &mock.SQLMock{
 			Engine:  "dummy",
 			Charset: "dummy",
 		}

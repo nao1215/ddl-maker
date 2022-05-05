@@ -1,44 +1,40 @@
 package mock
 
-type headerTemplate func() string
-type footerTemplate func() string
-type tableTemplate func() string
-
-// DummySQL is struct for test
-type DummySQL struct {
+// SQLMock is struct for test
+type SQLMock struct {
 	Engine             string
 	Charset            string
-	MockHeaderTemplate headerTemplate
-	MockFooterTemplate footerTemplate
-	MockTableTemplate  tableTemplate
+	MockHeaderTemplate func() string
+	MockFooterTemplate func() string
+	MockTableTemplate  func() string
 }
 
 // HeaderTemplate XXX
-func (dummySQL DummySQL) HeaderTemplate() string {
-	return dummySQL.MockHeaderTemplate()
+func (mockSQL SQLMock) HeaderTemplate() string {
+	return mockSQL.MockHeaderTemplate()
 }
 
 // FooterTemplate XXX
-func (dummySQL DummySQL) FooterTemplate() string {
-	return dummySQL.MockFooterTemplate()
+func (mockSQL SQLMock) FooterTemplate() string {
+	return mockSQL.MockFooterTemplate()
 }
 
 // TableTemplate XXX
-func (dummySQL DummySQL) TableTemplate() string {
-	return dummySQL.MockTableTemplate()
+func (mockSQL SQLMock) TableTemplate() string {
+	return mockSQL.MockTableTemplate()
 }
 
-// ToSQL convert dummySQL sql string from typeName and size
-func (dummySQL DummySQL) ToSQL(typeName string, size uint64) (string, error) {
+// ToSQL convert mockSQL sql string from typeName and size
+func (mockSQL SQLMock) ToSQL(typeName string, size uint64) (string, error) {
 	return "", nil
 }
 
 // Quote XXX
-func (dummySQL DummySQL) Quote(s string) string {
+func (mockSQL SQLMock) Quote(s string) string {
 	return ""
 }
 
 // AutoIncrement XXX
-func (dummySQL DummySQL) AutoIncrement() string {
+func (mockSQL SQLMock) AutoIncrement() string {
 	return ""
 }

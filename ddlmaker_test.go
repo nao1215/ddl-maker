@@ -107,7 +107,7 @@ func TestAddStruct2(t *testing.T) {
 			t.Fatal("error new maker", err)
 		}
 
-		dm.Dialect = &mock.DummySQL{
+		dm.Dialect = &mock.SQLMock{
 			Engine:  "dummy",
 			Charset: "dummy",
 		}
@@ -286,7 +286,7 @@ func TestGenerate2(t *testing.T) {
 		}
 		defer os.Remove("./testdata/test.sql")
 
-		dm.Dialect = &mock.DummySQL{
+		dm.Dialect = &mock.SQLMock{
 			Engine:  "dummy",
 			Charset: "dummy",
 			MockHeaderTemplate: func() string {
@@ -337,7 +337,7 @@ func TestGenerate2(t *testing.T) {
 func TestDDLMaker_generate(t *testing.T) {
 	t.Run("[Error] parse header tamplate error", func(t *testing.T) {
 		dm := DDLMaker{}
-		dm.Dialect = &mock.DummySQL{
+		dm.Dialect = &mock.SQLMock{
 			Engine:  "dummy",
 			Charset: "dummy",
 			MockHeaderTemplate: func() string {
@@ -358,7 +358,7 @@ func TestDDLMaker_generate(t *testing.T) {
 
 	t.Run("[Error] parse footer tamplate error", func(t *testing.T) {
 		dm := DDLMaker{}
-		dm.Dialect = &mock.DummySQL{
+		dm.Dialect = &mock.SQLMock{
 			Engine:  "dummy",
 			Charset: "dummy",
 			MockHeaderTemplate: func() string {
@@ -382,7 +382,7 @@ func TestDDLMaker_generate(t *testing.T) {
 
 	t.Run("[Error] parse table template error", func(t *testing.T) {
 		dm := DDLMaker{}
-		dm.Dialect = &mock.DummySQL{
+		dm.Dialect = &mock.SQLMock{
 			Engine:  "dummy",
 			Charset: "dummy",
 			MockHeaderTemplate: func() string {

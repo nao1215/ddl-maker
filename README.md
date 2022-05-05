@@ -1,10 +1,15 @@
+<div align="center">
+<img src="./doc/ja/img/ddl-maker_logo.png" title="ロゴ">
+</div>  
+
 [![UnitTest](https://github.com/nao1215/ddl-maker/actions/workflows/unit_test.yml/badge.svg)](https://github.com/nao1215/ddl-maker/actions/workflows/unit_test.yml)
 [![reviewdog](https://github.com/nao1215/ddl-maker/actions/workflows/reviewdog.yml/badge.svg)](https://github.com/nao1215/ddl-maker/actions/workflows/reviewdog.yml)
 [![codecov](https://codecov.io/gh/nao1215/ddl-maker/branch/main/graph/badge.svg?token=YLj6wiKpMS)](https://codecov.io/gh/nao1215/ddl-maker)
 [![Go Reference](https://pkg.go.dev/badge/github.com/nao1215/ddl-maker.svg)](https://pkg.go.dev/github.com/nao1215/ddl-maker)
 ![GitHub](https://img.shields.io/github/license/nao1215/ddl-maker)
 [![Go Report Card](https://goreportcard.com/badge/github.com/nao1215/ddl-maker)](https://goreportcard.com/report/github.com/nao1215/ddl-maker)  
-[[日本語](doc/ja/README.md)]
+[[日本語](doc/ja/README.md)]  
+
 # What is ddl-maker
 ddl-maker generate ddl (SQL file) from golang struct. It's only supported MySQL only now. The original code is [kayac/ddl-maker](https://github.com/kayac/ddl-maker) and this repository is a fork from it. nao1215/ddl-maker was not actively updated. I wanted to add features, add tests, and improve documentation. However, I wasn't sure if they would be merged. So, I decided to fork it and add our own features.
 

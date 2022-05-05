@@ -3,15 +3,14 @@
 [![codecov](https://codecov.io/gh/nao1215/ddl-maker/branch/main/graph/badge.svg?token=DO641K2SOW)](https://codecov.io/gh/nao1215/ddl-maker)
 [![Go Reference](https://pkg.go.dev/badge/github.com/nao1215/ddl-maker.svg)](https://pkg.go.dev/github.com/nao1215/ddl-maker)
 [![Go Report Card](https://goreportcard.com/badge/github.com/nao1215/ddl-maker)](https://goreportcard.com/report/github.com/nao1215/ddl-maker)  
-[[日本語](doc/ja/README.md)]
-# ddl-maker (Why I forked from kayac/ddl-maker)
-ddl-maker generate ddl (SQL file) from golang struct. It's only supported MySQL only now. The original code is [kayac/ddl-maker](https://github.com/kayac/ddl-maker) and this repository is a fork from it. kayac/ddl-maker was not actively updated. I wanted to add features, add tests, and improve documentation. However, I wasn't sure if they would be merged. So, I decided to fork it and add our own features.
+# ddl-maker (kayac/ddl-makerをフォークした理由)
+ddl-makerは、Go言語の構造体からddl（SQLファイル）を生成します。現在は、MySQLのみをサポートしています。オリジナルコードは、[kayac/ddl-maker](https://github.com/kayac/ddl-maker)であり、本リポジトリはフォーク版です。kayac/ddl-makerは、積極的な更新がされてきませんでした。私は、機能追加、テスト追加、ドキュメント改善を検討していました。しかし、それらの変更がマージされるかどうかは不確かでした。そこで、私はフォーク版で開発を進めることを決め、独自の機能追加を始めました。
 
-# How to use
-The following sample code uses two files.
-- `example.go` defining structures for DDL generation
-- `create_ddl.go` defines an implementation for generating DDL from golang structures.
-
+# 使い方
+以下の例では、2つのファイルを用います。
+- `example.go`は、DDL生成用の構造体を定義します。
+- `create_ddl.go`は、Go言語の構造体からDDLを生成するための実装を定義します。
+  
 ### `_example/example.go`
 
 ```go
@@ -204,7 +203,7 @@ func main() {
 }
 ```
 ## generate ddl
-In this example, the DDL is generated as `sql/schema.sql`.
+今回の例では、DDLは`sql/schema.sql`として生成されます。
 
 ```shell
 $ cd _example
@@ -281,12 +280,12 @@ SET foreign_key_checks=1;
 
 ___
 
-## Support SQL Driver
+## サポートするSQLドライバ
 
 - MySQL
 
 
-## MySQL and Golang Type  Correspondence table
+## MySQLとGolangにおける型変換表
 
 |        Golang Type        |   MySQL Column    |
 | :------------------------ | :---------------- |
@@ -305,23 +304,23 @@ ___
 | time.Time, mysql.NullTime |     DATETIME      |
 |      json.RawMessage      |        JSON       |
 
-[mysql.NullTime](https://godoc.org/github.com/go-sql-driver/mysql#NullTime) is from [github.com/go-sql-driver/mysql](https://github.com/go-sql-driver/mysql).
+[mysql.NullTime](https://godoc.org/github.com/go-sql-driver/mysql#NullTime)は、[github.com/go-sql-driver/mysql](https://github.com/go-sql-driver/mysql)で定義されています。
 
-## Option using Golang Struct Tag Field's
+## Golang 構造体タグフィールドで用いるオプション
 
-tag prefix is `ddl`
+タグのプレフィックスは、`ddl`です。
 
 |   TAG Value   |                  VALUE                   |
-| :-----------: | :--------------------------------------: |
+| :------------ | :--------------------------------------- |
 |     null      |        NULL  (DEFAULT `NOT NULL`)        |
 | size=`<size>` |         VARCHAR(`<size value>`)          |
 |     auto      |              AUTO INCREMENT              |
 | type=`<type>` | OVERRIDE struct type. <br> ex) string \`ddl:"text` |
 |      -        |            Don't define column           |
 
-## How to Set PrimaryKey
+## Primary Keyをセットする方法
 
-Define struct method called `PrimaryKey()`
+構造体メソッドとして`PrimaryKey()`を定義してください。
 
 ```go
 func (b Bookmark) PrimaryKey() dialect.PrimaryKey {
@@ -330,16 +329,17 @@ func (b Bookmark) PrimaryKey() dialect.PrimaryKey {
 
 ```
 
-## How to Set Index
+## Indexをセットする方法
 
-Define struct method called `Indexes()`
+構造体メソッドとして`Indexes()`を定義してください。
 
 |   Index Type    |                                   Method                                    |
-| :-------------: | :-------------------------------------------------------------------------: |
+| :------------- | :------------------------------------------------------------------------- |
 |      Index      |                  dialect.Index(`index name`, `columns`...)                  |
 |  Unique Index   |                dialect.UniqIndex(`index name`, `columns`...)                |
 | Full Text Index | dialect.FullTextIndex(`index name`, `columns`...).WithParser(`parser name`) |
 |  Spatial Index  |              dialect.SpatialIndex(`index name`, `columns`...)               |
+ex)
 
 ```go
 func (b Bookmark) Indexes() dialect.Indexes {
@@ -349,11 +349,11 @@ func (b Bookmark) Indexes() dialect.Indexes {
 }
 ```
 
-## How to Set ForeignKey
+## Foreign Keyをセットする方法
 
-Define struct method called `ForeignKeys()`
+構造体メソッドとして`ForeignKeys()`を定義してください。
 
-### Referential Actions Option
+### Referential Actions オプション
 
 | ReferentialActionsOption |                          Method                         |
 |:-------------------------|:--------------------------------------------------------|
@@ -385,15 +385,14 @@ func (pc PlayerComment) ForeignKeys() dialect.ForeignKeys {
 }
 ```
 
-# Contributing
-First off, thanks for taking the time to contribute! ❤️  See [CONTRIBUTING.md](./CONTRIBUTING.md) for more information.
-Contributions are not only related to development. For example, GitHub Star motivates me to develop!
+# 貢献
+はじめに、本リポジトリへの貢献に関して、お時間をいただきありがとうございます。 [CONTRIBUTING.md](./../../CONTRIBUTING.md)に、より詳細な情報を記載しています。  
+貢献は、開発に関することだけではありません。例えば、GitHubのStarは、開発のモチベーションになります。
 [![Star History Chart](https://api.star-history.com/svg?repos=nao1215/ddl-maker&type=Date)](https://star-history.com/#nao1215/ddl-maker&Date)
 
-# Contact
-If you would like to send comments such as "find a bug" or "request for additional features" to the developer, please use one of the following contacts.
-
+# 連絡先
+開発者に対して「バグ報告」や「機能の追加要望」がある場合は、コメントをください。その際、以下の連絡先を使用してください。
 - [GitHub Issue](https://github.com/nao1215/ddl-maker/issues)
 
-# LICENSE
-The ddl-maker project is licensed under the terms of [the Apache License 2.0](./LICENSE).
+# ライセンス
+ddl-makerプロジェクトは、[Apache License 2.0条文](./../../LICENSE)の下でライセンスされています。

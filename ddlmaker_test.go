@@ -86,6 +86,36 @@ func TestAddStruct(t *testing.T) {
 	}
 }
 
+func TestAddStruct2(t *testing.T) {
+	t.Run("[Error] add same struct at twice", func(t *testing.T) {
+		dm, err := New(Config{
+			OutFilePath: "",
+			DB: DBConfig{
+				Driver:  "mysql",
+				Engine:  "InnoDB",
+				Charset: "utf8mb4",
+			},
+		})
+		if err != nil {
+			t.Fatal("error new maker", err)
+		}
+
+		dm.Dialect = &mock.DummySQL{
+			Engine:  "dummy",
+			Charset: "dummy",
+		}
+
+		got := dm.AddStruct(&TestOne{}, &TestOne{})
+		if got == nil {
+			t.Fatal("add struct error did not occure")
+		}
+		want := "github.com/nao1215/ddl-maker.TestOne is already added"
+		if want != got.Error() {
+			t.Errorf("mismatch want:%s, got:%s", want, got.Error())
+		}
+	})
+}
+
 func TestGenerate(t *testing.T) {
 	m := mysql.MySQL{}
 	generatedDDL := fmt.Sprintf(`%s

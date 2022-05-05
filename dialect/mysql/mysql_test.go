@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestToSQL(t *testing.T) {
@@ -269,6 +271,33 @@ func TestForeignKey_ToSQL(t *testing.T) {
 			}
 			if got := fk.ToSQL(); got != tt.want {
 				t.Errorf("ForeignKey.ToSQL() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestWithDeleteForeignKeyOption(t *testing.T) {
+	type args struct {
+		option ForeignKeyOptionType
+	}
+	tests := []struct {
+		name string
+		args args
+		want ForeignKeyOption
+	}{
+		{
+			name: "[Normal] withDeleteForeignKeyOption set default",
+			args: args{
+				option: ForeignKeyOptionSetDefault,
+			},
+			want: WithDeleteForeignKeyOption(ForeignKeyOptionSetDefault),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := WithDeleteForeignKeyOption(tt.args.option)
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Errorf("Compare value is mismatch (-want +got):%s\n", diff)
 			}
 		})
 	}

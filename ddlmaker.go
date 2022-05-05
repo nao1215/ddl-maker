@@ -79,7 +79,7 @@ func (dm *DDLMaker) Generate() error {
 	log.Printf("start generate %s \n", dm.config.OutFilePath)
 	err := dm.parse()
 	if err != nil {
-		return err
+		return err // This pass will not go through.
 	}
 
 	file, err := os.Create(dm.config.OutFilePath)

@@ -304,7 +304,7 @@ func TestGenerate2(t *testing.T) {
 		}
 	})
 
-	t.Run("[Error] parse error", func(t *testing.T) {
+	t.Run("[Error] template execute error", func(t *testing.T) {
 		dm, err := New(Config{
 			OutFilePath: "./testdata/test.sql",
 			DB: DBConfig{
@@ -326,7 +326,7 @@ func TestGenerate2(t *testing.T) {
 		got := dm.Generate()
 		want := mysql.ErrInvalidType
 		if got == nil {
-			t.Fatal("parse error did not occure")
+			t.Fatal("template execute error did not occure")
 		}
 		if !errors.As(got, &want) {
 			t.Errorf("mismatch want:%v, got:%v", want, got)

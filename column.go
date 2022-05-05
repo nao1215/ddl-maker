@@ -9,14 +9,19 @@ import (
 	"github.com/nao1215/ddl-maker/dialect"
 )
 
-// column is mapping struct field value.
+// column is the model for mapping structure field to table column.
 type column struct {
-	name     string
+	// name is column name
+	name string
+	// typeName is name of type that defined in golang
 	typeName string
-	tag      string
-	dialect  dialect.Dialect
+	// tag is that specified in the structure field
+	tag string
+	// dialect is interface that eliminates differences in DB drivers.
+	dialect dialect.Dialect
 }
 
+// newColumn return initialized column.
 func newColumn(name, typeName, tag string, d dialect.Dialect) column {
 	return column{
 		name:     name,
@@ -26,6 +31,7 @@ func newColumn(name, typeName, tag string, d dialect.Dialect) column {
 	}
 }
 
+// size return data size specified by "size" tag.
 func (c column) size() (uint64, error) {
 	specs := c.specs()
 	if specs["size"] == "" {
@@ -35,6 +41,7 @@ func (c column) size() (uint64, error) {
 	return strconv.ParseUint(specs["size"], 10, 64)
 }
 
+// specs converts each tag of a golang structure into a key-value format map
 func (c column) specs() map[string]string {
 	elems := strings.Split(c.tag, ",")
 	specs := make(map[string]string, len(elems))
@@ -51,6 +58,7 @@ func (c column) specs() map[string]string {
 	return specs
 }
 
+// attribute returns DB attributes (constraints)
 func (c column) attribute() string {
 	var attributes []string
 	specs := c.specs()
@@ -73,11 +81,12 @@ func (c column) attribute() string {
 	return strings.Join(attributes, " ")
 }
 
+// Name return column name. This name is snake case.
 func (c column) Name() string {
 	return c.name
 }
 
-// ToSQL is convert struct value to sql.
+// ToSQL convert struct field to sql.
 func (c column) ToSQL() string {
 	var columnType string
 	specs := c.specs()

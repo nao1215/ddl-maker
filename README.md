@@ -6,7 +6,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/nao1215/ddl-maker)](https://goreportcard.com/report/github.com/nao1215/ddl-maker)  
 [[日本語](doc/ja/README.md)]
 # What is ddl-maker
-ddl-maker generate ddl (SQL file) from golang struct. It's only supported MySQL only now. The original code is [kayac/ddl-maker](https://github.com/kayac/ddl-maker) and this repository is a fork from it. kayac/ddl-maker was not actively updated. I wanted to add features, add tests, and improve documentation. However, I wasn't sure if they would be merged. So, I decided to fork it and add our own features.
+ddl-maker generate ddl (SQL file) from golang struct. It's only supported MySQL only now. The original code is [kayac/ddl-maker](https://github.com/kayac/ddl-maker) and this repository is a fork from it. nao1215/ddl-maker was not actively updated. I wanted to add features, add tests, and improve documentation. However, I wasn't sure if they would be merged. So, I decided to fork it and add our own features.
 
 # How to use
 The following sample code uses two files.
@@ -22,8 +22,8 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/kayac/ddl-maker/dialect"
-	"github.com/kayac/ddl-maker/dialect/mysql"
+	"github.com/nao1215/ddl-maker/dialect"
+	"github.com/nao1215/ddl-maker/dialect/mysql"
 )
 
 type User struct {
@@ -143,8 +143,8 @@ import (
 	"flag"
 	"log"
 
-	"github.com/kayac/ddl-maker"
-	ex "github.com/kayac/ddl-maker/_example"
+	"github.com/nao1215/ddl-maker"
+	ex "github.com/nao1215/ddl-maker/_example"
 )
 
 func main() {

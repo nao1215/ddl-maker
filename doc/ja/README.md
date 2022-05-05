@@ -5,7 +5,7 @@
 ![GitHub](https://img.shields.io/github/license/nao1215/ddl-maker)
 [![Go Report Card](https://goreportcard.com/badge/github.com/nao1215/ddl-maker)](https://goreportcard.com/report/github.com/nao1215/ddl-maker)  
 # ddl-makerとは
-ddl-makerは、Go言語の構造体からddl（SQLファイル）を生成します。現在は、MySQLのみをサポートしています。オリジナルコードは、[kayac/ddl-maker](https://github.com/kayac/ddl-maker)であり、本リポジトリはフォーク版です。kayac/ddl-makerは、積極的な更新がされてきませんでした。私は、機能追加、テスト追加、ドキュメント改善を検討していました。しかし、それらの変更がマージされるかどうかは不確かでした。そこで、私はフォーク版で開発を進めることを決め、独自の機能追加を始めました。
+ddl-makerは、Go言語の構造体からddl（SQLファイル）を生成します。現在は、MySQLのみをサポートしています。オリジナルコードは、[kayac/ddl-maker](https://github.com/kayac/ddl-maker)であり、本リポジトリはフォーク版です。nao1215/ddl-makerは、積極的な更新がされてきませんでした。私は、機能追加、テスト追加、ドキュメント改善を検討していました。しかし、それらの変更がマージされるかどうかは不確かでした。そこで、私はフォーク版で開発を進めることを決め、独自の機能追加を始めました。
 
 # 使い方
 以下の例では、2つのファイルを用います。
@@ -21,8 +21,8 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/kayac/ddl-maker/dialect"
-	"github.com/kayac/ddl-maker/dialect/mysql"
+	"github.com/nao1215/ddl-maker/dialect"
+	"github.com/nao1215/ddl-maker/dialect/mysql"
 )
 
 type User struct {
@@ -142,8 +142,8 @@ import (
 	"flag"
 	"log"
 
-	"github.com/kayac/ddl-maker"
-	ex "github.com/kayac/ddl-maker/_example"
+	"github.com/nao1215/ddl-maker"
+	ex "github.com/nao1215/ddl-maker/_example"
 )
 
 func main() {

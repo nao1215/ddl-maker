@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kayac/ddl-maker/dialect"
-	"github.com/kayac/ddl-maker/dialect/mysql"
+	"github.com/nao1215/ddl-maker/dialect/mysql"
+	"github.com/nao1215/ddl-maker/dialect"
 )
 
 type Test1 struct {

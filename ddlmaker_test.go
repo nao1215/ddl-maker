@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/nao1215/ddl-maker/dialect"
+	"github.com/nao1215/ddl-maker/dialect/mock"
 	"github.com/nao1215/ddl-maker/dialect/mysql"
 )
 
@@ -167,4 +168,78 @@ CREATE TABLE %s (
 	if ddl2.String() != generatedDDL2 {
 		t.Fatalf("generatedDDL: %s \n checkDDLL: %s \n", ddl2.String(), generatedDDL2)
 	}
+}
+
+func TestDDLMaker_generate(t *testing.T) {
+	t.Run("[Error] parse header tamplate error", func(t *testing.T) {
+		dm := DDLMaker{}
+		dm.Dialect = &mock.DummySQL{
+			Engine:  "dummy",
+			Charset: "dummy",
+			MockHeaderTemplate: func() string {
+				return "{{"
+			},
+		}
+
+		var ddl bytes.Buffer
+		got := dm.generate(&ddl)
+		want := "error parse header template: template: header:1: unclosed action"
+		if got == nil {
+			t.Fatal("parse error did not occure")
+		}
+		if want != got.Error() {
+			t.Errorf("mismatch want:%s, got:%s", want, got.Error())
+		}
+	})
+
+	t.Run("[Error] parse footer tamplate error", func(t *testing.T) {
+		dm := DDLMaker{}
+		dm.Dialect = &mock.DummySQL{
+			Engine:  "dummy",
+			Charset: "dummy",
+			MockHeaderTemplate: func() string {
+				return ""
+			},
+			MockFooterTemplate: func() string {
+				return "{{"
+			},
+		}
+
+		var ddl bytes.Buffer
+		got := dm.generate(&ddl)
+		want := "error parse footer template: template: footer:1: unclosed action"
+		if got == nil {
+			t.Fatal("parse error did not occure")
+		}
+		if want != got.Error() {
+			t.Errorf("mismatch want:%s, got:%s", want, got.Error())
+		}
+	})
+
+	t.Run("[Error] parse table template error", func(t *testing.T) {
+		dm := DDLMaker{}
+		dm.Dialect = &mock.DummySQL{
+			Engine:  "dummy",
+			Charset: "dummy",
+			MockHeaderTemplate: func() string {
+				return ""
+			},
+			MockFooterTemplate: func() string {
+				return ""
+			},
+			MockTableTemplate: func() string {
+				return "{{"
+			},
+		}
+
+		var ddl bytes.Buffer
+		got := dm.generate(&ddl)
+		want := "error parse ddl template: template: ddl:1: unclosed action"
+		if got == nil {
+			t.Fatal("parse error did not occure")
+		}
+		if want != got.Error() {
+			t.Errorf("mismatch want:%s, got:%s", want, got.Error())
+		}
+	})
 }

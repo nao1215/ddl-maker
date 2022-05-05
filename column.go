@@ -102,7 +102,10 @@ func (c column) ToSQL() (string, error) {
 		return "", fmt.Errorf("error size parse error: %w", err)
 	}
 
-	sql := c.dialect.ToSQL(columnType, size)
+	sql, err := c.dialect.ToSQL(columnType, size)
+	if err != nil {
+		return "", fmt.Errorf("can not convert struct field to sql: %w", err)
+	}
 	attribute := c.attribute()
 
 	return fmt.Sprintf("%s %s %s", name, sql, attribute), nil

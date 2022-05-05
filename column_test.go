@@ -1,6 +1,7 @@
 package ddlmaker
 
 import (
+	"errors"
 	"reflect"
 	"testing"
 
@@ -151,6 +152,22 @@ func TestToSQL(t *testing.T) {
 		want := "error size parse error: strconv.ParseUint: parsing \"-1\": invalid syntax"
 		if want != got.Error() {
 			t.Fatalf("mismatch: want=%s, got=%s", want, got.Error())
+		}
+	})
+
+	t.Run("[Error] parse error because type name is unknown", func(t *testing.T) {
+		c := column{
+			typeName: "unknown",
+			name:     "comment",
+			tag:      "size=1",
+			dialect:  mysql.MySQL{},
+		}
+		_, got := c.ToSQL()
+		if got == nil {
+			t.Fatal("type name is unknown. however, error did not occure")
+		}
+		if !errors.As(got, &mysql.ErrInvalidType) {
+			t.Errorf("mismatch: want=%v, got=%v", mysql.ErrInvalidType, got)
 		}
 	})
 }

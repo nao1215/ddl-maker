@@ -29,8 +29,8 @@ func (dummySQL DummySQL) TableTemplate() string {
 }
 
 // ToSQL convert dummySQL sql string from typeName and size
-func (dummySQL DummySQL) ToSQL(typeName string, size uint64) string {
-	return ""
+func (dummySQL DummySQL) ToSQL(typeName string, size uint64) (string, error) {
+	return "", nil
 }
 
 // Quote XXX

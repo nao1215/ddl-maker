@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 )
@@ -66,8 +67,31 @@ func TestToSQL(t *testing.T) {
 	}
 
 	for _, tc := range testcases {
-		if m.ToSQL(tc.typeName, tc.size) != tc.output {
-			t.Fatalf("error %s to sql %s. but result %s", tc.typeName, tc.output, m.ToSQL(tc.typeName, tc.size))
+		got, err := m.ToSQL(tc.typeName, tc.size)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got != tc.output {
+			t.Fatalf("error %s to sql %s. but result %s", tc.typeName, tc.output, got)
+		}
+	}
+}
+
+func TestToSQL2(t *testing.T) {
+	m := MySQL{}
+
+	testcases := []struct {
+		typeName string
+		size     uint64
+		output   error
+	}{
+		{"noExistType", 0, ErrInvalidType},
+	}
+
+	for _, tc := range testcases {
+		_, got := m.ToSQL(tc.typeName, tc.size)
+		if !errors.As(got, &tc.output) {
+			t.Errorf("mismatch want=%v, got=%v", tc.output, got)
 		}
 	}
 }

@@ -1,8 +1,8 @@
 package mysql
 
 import (
+	"errors"
 	"fmt"
-	"log"
 	"strings"
 )
 
@@ -11,6 +11,9 @@ const (
 	defaultVarbinarySize = 767
 	autoIncrement        = "AUTO_INCREMENT"
 )
+
+// ErrInvalidType means Invalid type specified when parsing
+var ErrInvalidType = errors.New("Specified type is invalid")
 
 // MySQL XXX
 type MySQL struct {
@@ -146,74 +149,67 @@ CREATE TABLE {{ .Name }} (
 }
 
 // ToSQL convert mysql sql string from typeName and size
-func (mysql MySQL) ToSQL(typeName string, size uint64) string {
-	var columns []string
-
+func (mysql MySQL) ToSQL(typeName string, size uint64) (string, error) {
 	switch typeName {
 	case "int8", "*int8":
-		return "TINYINT"
+		return "TINYINT", nil
 	case "int16", "*int16":
-		return "SMALLINT"
+		return "SMALLINT", nil
 	case "int32", "*int32", "sql.NullInt32": // from Go 1.13
-		return "INTEGER"
+		return "INTEGER", nil
 	case "int64", "*int64", "sql.NullInt64":
-		return "BIGINT"
+		return "BIGINT", nil
 	case "uint8", "*uint8":
-		return "TINYINT unsigned"
+		return "TINYINT unsigned", nil
 	case "uint16", "*uint16":
-		return "SMALLINT unsigned"
+		return "SMALLINT unsigned", nil
 	case "uint32", "*uint32":
-		return "INTEGER unsigned"
+		return "INTEGER unsigned", nil
 	case "uint64", "*uint64":
-		return "BIGINT unsigned"
+		return "BIGINT unsigned", nil
 	case "float32", "*float32":
-		return "FLOAT"
+		return "FLOAT", nil
 	case "float64", "*float64", "sql.NullFloat64":
-		return "DOUBLE"
+		return "DOUBLE", nil
 	case "string", "*string", "sql.NullString":
-		return varchar(size)
+		return varchar(size), nil
 	case "[]uint8", "sql.RawBytes":
-		return varbinary(size)
+		return varbinary(size), nil
 	case "bool", "*bool", "sql.NullBool":
-		return "TINYINT(1)"
+		return "TINYINT(1)", nil
 	case "tinytext":
-		return "TINYTEXT"
+		return "TINYTEXT", nil
 	case "text":
-		return "TEXT"
+		return "TEXT", nil
 	case "mediumtext":
-		return "MEDIUMTEXT"
+		return "MEDIUMTEXT", nil
 	case "longtext":
-		return "LONGTEXT"
+		return "LONGTEXT", nil
 	case "tinyblob":
-		return "TINYBLOB"
+		return "TINYBLOB", nil
 	case "blob":
-		return "BLOB"
+		return "BLOB", nil
 	case "mediumblob":
-		return "MEDIUMBLOB"
+		return "MEDIUMBLOB", nil
 	case "longblob":
-		return "LONGBLOB"
+		return "LONGBLOB", nil
 	case "time":
-		return "TIME"
+		return "TIME", nil
 	case "time.Time", "*time.Time":
-		return datetime(size)
+		return datetime(size), nil
 	case "mysql.NullTime": // https://godoc.org/github.com/go-sql-driver/mysql#NullTime
-		return datetime(size)
+		return datetime(size), nil
 	case "sql.NullTime": // from Go 1.13
-		return datetime(size)
+		return datetime(size), nil
 	case "date":
-		return "DATE"
+		return "DATE", nil
 	case "json.RawMessage", "*json.RawMessage":
-		return "JSON"
+		return "JSON", nil
 	case "geometry":
-		return "GEOMETRY"
+		return "GEOMETRY", nil
 	default:
-		log.Fatalf("%s is not match.", typeName)
+		return "", fmt.Errorf("%w: %s", ErrInvalidType, typeName)
 	}
-
-	if size != 0 {
-		columns = append(columns, fmt.Sprintf("(%d)", size))
-	}
-	return strings.Join(columns, "")
 }
 
 // Quote XXX

@@ -12,7 +12,7 @@ type Dialect interface {
 	HeaderTemplate() string
 	FooterTemplate() string
 	TableTemplate() string
-	ToSQL(typeName string, size uint64) string
+	ToSQL(typeName string, size uint64) (string, error)
 	Quote(string) string
 	AutoIncrement() string
 }

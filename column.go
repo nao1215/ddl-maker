@@ -2,7 +2,6 @@ package ddlmaker
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 
@@ -87,7 +86,7 @@ func (c column) Name() string {
 }
 
 // ToSQL convert struct field to sql.
-func (c column) ToSQL() string {
+func (c column) ToSQL() (string, error) {
 	var columnType string
 	specs := c.specs()
 
@@ -100,11 +99,11 @@ func (c column) ToSQL() string {
 	name := c.dialect.Quote(c.name)
 	size, err := c.size()
 	if err != nil {
-		log.Fatalf("error size parse error %v", err)
+		return "", fmt.Errorf("error size parse error: %w", err)
 	}
 
 	sql := c.dialect.ToSQL(columnType, size)
 	attribute := c.attribute()
 
-	return fmt.Sprintf("%s %s %s", name, sql, attribute)
+	return fmt.Sprintf("%s %s %s", name, sql, attribute), nil
 }

@@ -68,42 +68,91 @@ func TestAttribute(t *testing.T) {
 }
 
 func TestToSQL(t *testing.T) {
-	c := column{
-		typeName: "int64",
-		name:     "id",
-		dialect:  mysql.MySQL{},
-	}
+	t.Run("[Normal] int64 to BIGINT", func(t *testing.T) {
+		c := column{
+			typeName: "int64",
+			name:     "id",
+			dialect:  mysql.MySQL{},
+		}
 
-	if c.ToSQL() != "`id` BIGINT NOT NULL" {
-		t.Fatalf("error ToSQL. result: %s", c.ToSQL())
-	}
+		got, err := c.ToSQL()
+		if err != nil {
+			t.Fatal(err)
+		}
+		want := "`id` BIGINT NOT NULL"
+		if want != got {
+			t.Fatalf("mismatch: want=%s, got=%s", want, got)
+		}
+	})
 
-	c.typeName = "uint64"
-	if c.ToSQL() != "`id` BIGINT unsigned NOT NULL" {
-		t.Fatalf("error ToSQL. result: %s", c.ToSQL())
-	}
+	t.Run("[Normal] uint64 to BIGINT unsigned", func(t *testing.T) {
+		c := column{
+			typeName: "uint64",
+			name:     "id",
+			dialect:  mysql.MySQL{},
+		}
 
-	c = column{
-		typeName: "string",
-		name:     "description",
-		tag:      "size=20,null",
-		dialect:  mysql.MySQL{},
-	}
+		got, err := c.ToSQL()
+		if err != nil {
+			t.Fatal(err)
+		}
+		want := "`id` BIGINT unsigned NOT NULL"
+		if want != got {
+			t.Fatalf("mismatch: want=%s, got=%s", want, got)
+		}
+	})
 
-	if c.ToSQL() != "`description` VARCHAR(20) NULL" {
-		t.Fatalf("error ToSQL. result: %s", c.ToSQL())
-	}
+	t.Run("[Normal] string to VARCHAR(20)", func(t *testing.T) {
+		c := column{
+			typeName: "string",
+			name:     "description",
+			tag:      "size=20,null",
+			dialect:  mysql.MySQL{},
+		}
 
-	c = column{
-		typeName: "string",
-		name:     "comment",
-		tag:      "null,type=text",
-		dialect:  mysql.MySQL{},
-	}
+		got, err := c.ToSQL()
+		if err != nil {
+			t.Fatal(err)
+		}
+		want := "`description` VARCHAR(20) NULL"
+		if want != got {
+			t.Fatalf("mismatch: want=%s, got=%s", want, got)
+		}
+	})
 
-	if c.ToSQL() != "`comment` TEXT NULL" {
-		t.Fatalf("error ToSQL. result: %s", c.ToSQL())
-	}
+	t.Run("[Normal] string to VARCHAR(20)", func(t *testing.T) {
+		c := column{
+			typeName: "string",
+			name:     "comment",
+			tag:      "null,type=text",
+			dialect:  mysql.MySQL{},
+		}
+		got, err := c.ToSQL()
+		if err != nil {
+			t.Fatal(err)
+		}
+		want := "`comment` TEXT NULL"
+		if want != got {
+			t.Fatalf("mismatch: want=%s, got=%s", want, got)
+		}
+	})
+
+	t.Run("[Error] can not calculate column size (column size is minus)", func(t *testing.T) {
+		c := column{
+			typeName: "string",
+			name:     "comment",
+			tag:      "size=-1",
+			dialect:  mysql.MySQL{},
+		}
+		_, got := c.ToSQL()
+		if got == nil {
+			t.Fatal("column size is minus. however, error did not occure")
+		}
+		want := "error size parse error: strconv.ParseUint: parsing \"-1\": invalid syntax"
+		if want != got.Error() {
+			t.Fatalf("mismatch: want=%s, got=%s", want, got.Error())
+		}
+	})
 }
 
 func Test_column_Name(t *testing.T) {

@@ -30,7 +30,7 @@ type Table interface {
 // Column XXX
 type Column interface {
 	Name() string
-	ToSQL() string
+	ToSQL() (string, error)
 }
 
 // PrimaryKey XXX

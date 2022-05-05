@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/nao1215/ddl-maker/dialect"
-	"github.com/serenize/snaker"
+	"github.com/nao1215/nameconv"
 )
 
 // Table is for type assertion
@@ -82,7 +82,7 @@ func parseField(field reflect.StructField, d dialect.Dialect) (dialect.Column, e
 		typeName = field.Type.Name()
 	}
 
-	return newColumn(snaker.CamelToSnake(field.Name), typeName, tagStr, d), nil
+	return newColumn(nameconv.ToSnakeCase(field.Name), typeName, tagStr, d), nil
 }
 
 func parseTable(s interface{}, columns []dialect.Column, d dialect.Dialect) dialect.Table {
@@ -92,10 +92,10 @@ func parseTable(s interface{}, columns []dialect.Column, d dialect.Dialect) dial
 	var indexes dialect.Indexes
 
 	if v, ok := s.(Table); ok {
-		tableName = snaker.CamelToSnake(v.Table())
+		tableName = nameconv.ToSnakeCase(v.Table())
 	} else {
 		val := reflect.Indirect(reflect.ValueOf(s))
-		tableName = snaker.CamelToSnake(val.Type().Name())
+		tableName = nameconv.ToSnakeCase(val.Type().Name())
 	}
 	if v, ok := s.(PrimaryKey); ok {
 		primaryKey = v.PrimaryKey()

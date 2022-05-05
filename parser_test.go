@@ -20,7 +20,7 @@ type T1 struct {
 }
 
 func (t1 T1) Table() string {
-	return "test1"
+	return "test_one"
 }
 
 func (t1 T1) Indexes() dialect.Indexes {

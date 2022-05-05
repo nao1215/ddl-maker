@@ -7,7 +7,7 @@ import (
 	"github.com/nao1215/ddl-maker/dialect/mysql"
 )
 
-// Dialect XXX
+// Dialect is interface that eliminates differences in DB drivers.
 type Dialect interface {
 	HeaderTemplate() string
 	FooterTemplate() string
@@ -17,7 +17,7 @@ type Dialect interface {
 	AutoIncrement() string
 }
 
-// Table XXX
+// Table is interface to generate tables for each DB (e.g. MySQL, PostgreSQL)
 type Table interface {
 	Name() string
 	PrimaryKey() PrimaryKey

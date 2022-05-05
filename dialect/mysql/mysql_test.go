@@ -314,7 +314,7 @@ func TestMySQL_HeaderTemplate(t *testing.T) {
 		want   string
 	}{
 		{
-			name:   "[Normal]",
+			name:   "[Normal] return header template",
 			fields: fields{},
 			want: `SET foreign_key_checks=0;
 `,
@@ -326,8 +326,86 @@ func TestMySQL_HeaderTemplate(t *testing.T) {
 				Engine:  tt.fields.Engine,
 				Charset: tt.fields.Charset,
 			}
-			if got := mysql.HeaderTemplate(); got != tt.want {
-				t.Errorf("MySQL.HeaderTemplate() = %v, want %v", got, tt.want)
+			got := mysql.HeaderTemplate()
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Errorf("Compare value is mismatch (-want +got):%s\n", diff)
+			}
+		})
+	}
+}
+
+func TestMySQL_FooterTemplate(t *testing.T) {
+	type fields struct {
+		Engine  string
+		Charset string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{
+			name:   "[Normal] return footer template",
+			fields: fields{},
+			want: `SET foreign_key_checks=1;
+`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mysql := MySQL{
+				Engine:  tt.fields.Engine,
+				Charset: tt.fields.Charset,
+			}
+			got := mysql.FooterTemplate()
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Errorf("Compare value is mismatch (-want +got):%s\n", diff)
+			}
+		})
+	}
+}
+
+func TestMySQL_TableTemplate(t *testing.T) {
+	type fields struct {
+		Engine  string
+		Charset string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{
+			name:   "[Normal] return table template",
+			fields: fields{},
+			want: `
+DROP TABLE IF EXISTS {{ .Name }};
+
+CREATE TABLE {{ .Name }} (
+    {{ range .Columns -}}
+        {{ .ToSQL }},
+    {{ end -}}
+    {{ range .Indexes.Sort -}}
+        {{ .ToSQL }},
+    {{ end -}}
+    {{ range .ForeignKeys.Sort  -}}
+        {{ .ToSQL }},
+    {{ end -}}
+    {{ .PrimaryKey.ToSQL }}
+) ENGINE={{ .Dialect.Engine }} DEFAULT CHARACTER SET {{ .Dialect.Charset }};
+
+`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mysql := MySQL{
+				Engine:  tt.fields.Engine,
+				Charset: tt.fields.Charset,
+			}
+			got := mysql.TableTemplate()
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Errorf("Compare value is mismatch (-want +got):%s\n", diff)
 			}
 		})
 	}

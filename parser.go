@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/kayac/ddl-maker/dialect"
+	"github.com/nao1215/ddl-maker/dialect"
 	"github.com/serenize/snaker"
 )
 

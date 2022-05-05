@@ -8,7 +8,7 @@ import (
 	"reflect"
 	"text/template"
 
-	"github.com/kayac/ddl-maker/dialect"
+	"github.com/nao1215/ddl-maker/dialect"
 	"github.com/pkg/errors"
 )
 

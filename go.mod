@@ -1,4 +1,4 @@
-module github.com/kayac/ddl-maker
+module github.com/nao1215/ddl-maker
 
 go 1.18
 
@@ -8,6 +8,6 @@ require (
 )
 
 require (
-	github.com/onsi/ginkgo v1.15.0 // indirect
-	github.com/onsi/gomega v1.10.5 // indirect
+	github.com/onsi/ginkgo v1.16.5 // indirect
+	github.com/onsi/gomega v1.19.0 // indirect
 )

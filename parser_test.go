@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/nao1215/ddl-maker/dialect"
+	"github.com/nao1215/ddl-maker/dialect/mock"
 	"github.com/nao1215/ddl-maker/dialect/mysql"
 )
 
@@ -17,6 +18,12 @@ type T1 struct {
 	CreatedAt   time.Time
 	Binary      []byte
 	Ignore      string `ddl:"-"`
+}
+
+type T2 struct {
+	ID     uint64 `ddl:"auto"`
+	Ignore string `ddl:"-"`
+	Name   *string
 }
 
 func (t1 T1) Table() string {
@@ -114,4 +121,23 @@ func TestParseTable(t *testing.T) {
 	if len(table.ForeignKeys()) != len(t1.ForeignKeys()) {
 		t.Fatal("error parse fk: ", len(table.ForeignKeys()))
 	}
+}
+
+func TestDDLMaker_parse(t *testing.T) {
+	t.Run("[Normal] can parse ignore field and pointer field", func(t *testing.T) {
+		dm := DDLMaker{}
+		dm.Dialect = &mock.SQLMock{
+			Engine:  "dummy",
+			Charset: "dummy",
+		}
+
+		if err := dm.AddStruct(&T2{}); err != nil {
+			t.Fatal(err)
+		}
+
+		got := dm.parse()
+		if got != nil {
+			t.Error(got)
+		}
+	})
 }

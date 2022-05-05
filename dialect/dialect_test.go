@@ -1,6 +1,7 @@
 package dialect
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/nao1215/ddl-maker/dialect/mysql"
@@ -34,4 +35,67 @@ func TestSort(t *testing.T) {
 		t.Fatal("error sort index", idxes[0].ToSQL())
 	}
 
+}
+
+func TestForeignKeys_Sort(t *testing.T) {
+	tests := []struct {
+		name        string
+		foreignKeys ForeignKeys
+		want        ForeignKeys
+	}{
+		{
+			name: "[Normal] can sort foreign keys",
+			foreignKeys: ForeignKeys{
+				mysql.AddForeignKey(
+					[]string{"player_id"},
+					[]string{"id"},
+					"player",
+				),
+				mysql.AddForeignKey(
+					[]string{"entry_id"},
+					[]string{"id"},
+					"entry",
+				),
+				mysql.AddForeignKey(
+					[]string{"dummy_id"},
+					[]string{"id"},
+					"dummy",
+				),
+				mysql.AddForeignKey(
+					[]string{"zynq_id"},
+					[]string{"id"},
+					"zynq",
+				),
+			},
+			want: ForeignKeys{
+				mysql.AddForeignKey(
+					[]string{"dummy_id"},
+					[]string{"id"},
+					"dummy",
+				),
+				mysql.AddForeignKey(
+					[]string{"entry_id"},
+					[]string{"id"},
+					"entry",
+				),
+				mysql.AddForeignKey(
+					[]string{"player_id"},
+					[]string{"id"},
+					"player",
+				),
+				mysql.AddForeignKey(
+					[]string{"zynq_id"},
+					[]string{"id"},
+					"zynq",
+				),
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.foreignKeys.Sort(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("ForeignKeys.Sort() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }

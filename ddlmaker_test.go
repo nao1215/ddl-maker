@@ -3,11 +3,13 @@ package ddlmaker
 import (
 	"bytes"
 	"database/sql"
+	"errors"
 	"fmt"
 	"os"
 	"testing"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/nao1215/ddl-maker/dialect"
 	"github.com/nao1215/ddl-maker/dialect/mock"
 	"github.com/nao1215/ddl-maker/dialect/mysql"
@@ -30,6 +32,11 @@ type TestTwo struct {
 	Comment   sql.NullString `ddl:"null"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
+}
+
+type unknown int
+type TestThree struct {
+	ID unknown
 }
 
 func (t2 *TestTwo) PrimaryKey() dialect.PrimaryKey {
@@ -100,7 +107,7 @@ func TestAddStruct2(t *testing.T) {
 			t.Fatal("error new maker", err)
 		}
 
-		dm.Dialect = &mock.DummySQL{
+		dm.Dialect = &mock.SQLMock{
 			Engine:  "dummy",
 			Charset: "dummy",
 		}
@@ -156,15 +163,15 @@ CREATE TABLE %s (
 		t.Fatal("error new maker", err)
 	}
 
-	err = dm.AddStruct(&TestOne{})
-	if err != nil {
+	if err = dm.AddStruct(&TestOne{}); err != nil {
 		t.Fatal("error add struct", err)
 	}
-	dm.parse()
+	if err = dm.parse(); err != nil {
+		t.Fatal(err)
+	}
 
 	var ddl1 bytes.Buffer
-	err = dm.generate(&ddl1)
-	if err != nil {
+	if err = dm.generate(&ddl1); err != nil {
 		t.Fatal("error generate ddl", err)
 	}
 
@@ -184,15 +191,15 @@ CREATE TABLE %s (
 		t.Fatal(err)
 	}
 
-	err = dm2.AddStruct(&TestTwo{})
-	if err != nil {
+	if err = dm2.AddStruct(&TestTwo{}); err != nil {
 		t.Fatal("error add pointer struct", err)
 	}
-	dm2.parse()
+	if err = dm2.parse(); err != nil {
+		t.Fatal(err)
+	}
 
 	var ddl2 bytes.Buffer
-	err = dm2.generate(&ddl2)
-	if err != nil {
+	if err = dm2.generate(&ddl2); err != nil {
 		t.Fatal("error generate ddl", err)
 	}
 
@@ -216,14 +223,14 @@ func TestGenerate2(t *testing.T) {
 		}
 		defer os.Remove("./testdata/test.sql")
 
-		err = dm.AddStruct(&TestOne{})
-		if err != nil {
+		if err = dm.AddStruct(&TestOne{}); err != nil {
 			t.Fatal("error add struct", err)
 		}
-		dm.parse()
+		if err = dm.parse(); err != nil {
+			t.Fatal(err)
+		}
 
-		err = dm.Generate()
-		if err != nil {
+		if err = dm.Generate(); err != nil {
 			t.Fatal(err)
 		}
 
@@ -237,8 +244,8 @@ func TestGenerate2(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if string(want) != string(got) {
-			t.Errorf("mismatch want:%s, got:%s", string(want), string(got))
+		if diff := cmp.Diff(string(want), string(got)); diff != "" {
+			t.Errorf("Compare value is mismatch (-want +got):%s\n", diff)
 		}
 	})
 
@@ -279,7 +286,7 @@ func TestGenerate2(t *testing.T) {
 		}
 		defer os.Remove("./testdata/test.sql")
 
-		dm.Dialect = &mock.DummySQL{
+		dm.Dialect = &mock.SQLMock{
 			Engine:  "dummy",
 			Charset: "dummy",
 			MockHeaderTemplate: func() string {
@@ -296,12 +303,41 @@ func TestGenerate2(t *testing.T) {
 			t.Errorf("mismatch want:%s, got:%s", want, got.Error())
 		}
 	})
+
+	t.Run("[Error] template execute error", func(t *testing.T) {
+		dm, err := New(Config{
+			OutFilePath: "./testdata/test.sql",
+			DB: DBConfig{
+				Driver:  "mysql",
+				Engine:  "InnoDB",
+				Charset: "utf8mb4",
+			},
+		})
+		if err != nil {
+			t.Fatal("error new maker", err)
+		}
+		defer os.Remove("./testdata/test.sql")
+
+		err = dm.AddStruct(&TestThree{})
+		if err != nil {
+			t.Fatal("error add struct", err)
+		}
+
+		got := dm.Generate()
+		want := mysql.ErrInvalidType
+		if got == nil {
+			t.Fatal("template execute error did not occure")
+		}
+		if !errors.As(got, &want) {
+			t.Errorf("mismatch want:%v, got:%v", want, got)
+		}
+	})
 }
 
 func TestDDLMaker_generate(t *testing.T) {
 	t.Run("[Error] parse header tamplate error", func(t *testing.T) {
 		dm := DDLMaker{}
-		dm.Dialect = &mock.DummySQL{
+		dm.Dialect = &mock.SQLMock{
 			Engine:  "dummy",
 			Charset: "dummy",
 			MockHeaderTemplate: func() string {
@@ -322,7 +358,7 @@ func TestDDLMaker_generate(t *testing.T) {
 
 	t.Run("[Error] parse footer tamplate error", func(t *testing.T) {
 		dm := DDLMaker{}
-		dm.Dialect = &mock.DummySQL{
+		dm.Dialect = &mock.SQLMock{
 			Engine:  "dummy",
 			Charset: "dummy",
 			MockHeaderTemplate: func() string {
@@ -346,7 +382,7 @@ func TestDDLMaker_generate(t *testing.T) {
 
 	t.Run("[Error] parse table template error", func(t *testing.T) {
 		dm := DDLMaker{}
-		dm.Dialect = &mock.DummySQL{
+		dm.Dialect = &mock.SQLMock{
 			Engine:  "dummy",
 			Charset: "dummy",
 			MockHeaderTemplate: func() string {

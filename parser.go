@@ -2,7 +2,6 @@ package ddlmaker
 
 import (
 	"fmt"
-	"log"
 	"reflect"
 	"strings"
 
@@ -30,7 +29,7 @@ type Index interface {
 	Indexes() dialect.Indexes
 }
 
-func (dm *DDLMaker) parse() {
+func (dm *DDLMaker) parse() error {
 	for _, s := range dm.Structs {
 		val := reflect.Indirect(reflect.ValueOf(s))
 		rt := val.Type()
@@ -43,7 +42,7 @@ func (dm *DDLMaker) parse() {
 				if err == ErrIgnoreField {
 					continue
 				}
-				log.Fatalln("error parse field", err.Error())
+				return fmt.Errorf("error parse field: %w", err) // This pass will not go through.
 			}
 			columns = append(columns, column)
 		}
@@ -51,6 +50,7 @@ func (dm *DDLMaker) parse() {
 		table := parseTable(s, columns, dm.Dialect)
 		dm.Tables = append(dm.Tables, table)
 	}
+	return nil
 }
 
 func parseField(field reflect.StructField, d dialect.Dialect) (dialect.Column, error) {

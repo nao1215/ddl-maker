@@ -70,7 +70,10 @@ func TestAddStruct(t *testing.T) {
 		t.Fatal("nil is not support")
 	}
 
-	dm.AddStruct(TestOne{}, TestTwo{})
+	err = dm.AddStruct(TestOne{}, TestTwo{})
+	if err != nil {
+		t.Fatal(err)
+	}
 	if len(dm.Structs) != 2 {
 		t.Fatal("[error] add stuct")
 	}
@@ -145,6 +148,9 @@ CREATE TABLE %s (
 			Charset: "utf8mb4",
 		},
 	})
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	err = dm2.AddStruct(&TestTwo{})
 	if err != nil {

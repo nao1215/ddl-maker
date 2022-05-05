@@ -4,6 +4,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/nao1215/ddl-maker/dialect"
 	"github.com/nao1215/ddl-maker/dialect/mysql"
 )
 
@@ -102,5 +103,47 @@ func TestToSQL(t *testing.T) {
 
 	if c.ToSQL() != "`comment` TEXT NULL" {
 		t.Fatalf("error ToSQL. result: %s", c.ToSQL())
+	}
+}
+
+func Test_column_Name(t *testing.T) {
+	type fields struct {
+		name     string
+		typeName string
+		tag      string
+		dialect  dialect.Dialect
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{
+			name: "[Normal] get column name",
+			fields: fields{
+				name: "column name",
+			},
+			want: "column name",
+		},
+		{
+			name: "[Normal] get empty string",
+			fields: fields{
+				name: "",
+			},
+			want: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := column{
+				name:     tt.fields.name,
+				typeName: tt.fields.typeName,
+				tag:      tt.fields.tag,
+				dialect:  tt.fields.dialect,
+			}
+			if got := c.Name(); got != tt.want {
+				t.Errorf("column.Name() = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }

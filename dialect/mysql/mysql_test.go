@@ -210,3 +210,29 @@ func TestAddForeignKey(t *testing.T) {
 		t.Fatal("[error] parse foreign key", fk.ToSQL())
 	}
 }
+
+func Test_varbinary(t *testing.T) {
+	type args struct {
+		size uint64
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "[Normal] return default size",
+			args: args{
+				size: 0,
+			},
+			want: "VARBINARY(767)",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := varbinary(tt.args.size); got != tt.want {
+				t.Errorf("varbinary() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

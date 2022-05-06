@@ -34,7 +34,7 @@ type Column interface {
 	ToSQL() (string, error)
 }
 
-// PrimaryKey XXX
+// PrimaryKey is a model for determining the primary key
 type PrimaryKey interface {
 	Columns() []string
 	ToSQL() string
@@ -72,13 +72,11 @@ func (foreignKeys ForeignKeys) Sort() ForeignKeys {
 	return sortForeignKeys
 }
 
-// Indexes XXX
+// Indexes is a slice of Indexes
 type Indexes []Index
 
-// Index XXX
+// Index is model representing indexes to speed up DB searches
 type Index interface {
-	Name() string
-	Columns() []string
 	ToSQL() string
 }
 

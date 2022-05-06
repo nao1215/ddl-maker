@@ -148,3 +148,22 @@ func (pk PrimaryKey) ToSQL() string {
 	}
 	return fmt.Sprintf("PRIMARY KEY (%s)", strings.Join(columnsStr, ", "))
 }
+
+// Index is model representing indexes to speed up DB searches
+type Index struct {
+	columns []string
+	table   string
+	name    string
+}
+
+// ToSQL return index sql string
+func (i Index) ToSQL() string {
+	var columnsStr []string
+
+	for _, c := range i.columns {
+		columnsStr = append(columnsStr, query.Quote(c))
+	}
+
+	return fmt.Sprintf("CREATE INDEX %s ON %s (%s);",
+		query.Quote(i.name), query.Quote(i.table), strings.Join(columnsStr, ", "))
+}

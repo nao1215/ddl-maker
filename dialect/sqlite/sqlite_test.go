@@ -668,3 +668,38 @@ func TestPrimaryKey_ToSQL(t *testing.T) {
 		})
 	}
 }
+
+func TestIndex_ToSQL(t *testing.T) {
+	type fields struct {
+		columns []string
+		table   string
+		name    string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{
+			name: "[Normal] return INDEX query",
+			fields: fields{
+				columns: []string{"aa", "bb", "cc"},
+				table:   "test_table",
+				name:    "test_index",
+			},
+			want: "CREATE INDEX `test_index` ON `test_table` (`aa`, `bb`, `cc`);",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			i := Index{
+				columns: tt.fields.columns,
+				table:   tt.fields.table,
+				name:    tt.fields.name,
+			}
+			if got := i.ToSQL(); got != tt.want {
+				t.Errorf("Index.ToSQL() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

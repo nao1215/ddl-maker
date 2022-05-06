@@ -1,6 +1,7 @@
 package sqlite
 
 import (
+	"reflect"
 	"testing"
 )
 
@@ -69,6 +70,7 @@ CREATE TABLE {{ .Name }} (
     {{ range .ForeignKeys.Sort  -}}
         {{ .ToSQL }},
     {{ end -}}
+    {{ .PrimaryKey.ToSQL }}
 );
 
 {{ range .Indexes.Sort -}}
@@ -576,6 +578,92 @@ func TestSQLite_AutoIncrement(t *testing.T) {
 			sqlite := SQLite{}
 			if got := sqlite.AutoIncrement(); got != tt.want {
 				t.Errorf("SQLite.AutoIncrement() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestAddPrimaryKey(t *testing.T) {
+	type args struct {
+		columns []string
+	}
+	tests := []struct {
+		name string
+		args args
+		want PrimaryKey
+	}{
+		{
+			name: "[Normal] return PrimaryKey struct",
+			args: args{
+				columns: []string{"aa", "bb", "cc"},
+			},
+			want: PrimaryKey{
+				columns: []string{"aa", "bb", "cc"},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := AddPrimaryKey(tt.args.columns...); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("AddPrimaryKey() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestPrimaryKey_Columns(t *testing.T) {
+	type fields struct {
+		columns []string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   []string
+	}{
+		{
+			name: "[Normal] return PrimaryKey columns",
+			fields: fields{
+				columns: []string{"aa", "bb", "cc"},
+			},
+			want: []string{"aa", "bb", "cc"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			pk := PrimaryKey{
+				columns: tt.fields.columns,
+			}
+			if got := pk.Columns(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("PrimaryKey.Columns() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestPrimaryKey_ToSQL(t *testing.T) {
+	type fields struct {
+		columns []string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{
+			name: "[Normal] return PRIMARY KEY query",
+			fields: fields{
+				columns: []string{"aa", "bb", "cc"},
+			},
+			want: "PRIMARY KEY (`aa`, `bb`, `cc`)",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			pk := PrimaryKey{
+				columns: tt.fields.columns,
+			}
+			if got := pk.ToSQL(); got != tt.want {
+				t.Errorf("PrimaryKey.ToSQL() = %v, want %v", got, tt.want)
 			}
 		})
 	}

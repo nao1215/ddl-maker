@@ -3,6 +3,7 @@ package sqlite
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/nao1215/ddl-maker/query"
 )
@@ -29,7 +30,8 @@ func (sqlite SQLite) FooterTemplate() string {
 `
 }
 
-// TableTemplate return string that is sql table template
+// TableTemplate return string that is sql table template.
+//
 func (sqlite SQLite) TableTemplate() string {
 	return `
 DROP TABLE IF EXISTS {{ .Name }};
@@ -41,6 +43,7 @@ CREATE TABLE {{ .Name }} (
     {{ range .ForeignKeys.Sort  -}}
         {{ .ToSQL }},
     {{ end -}}
+    {{ .PrimaryKey.ToSQL }}
 );
 
 {{ range .Indexes.Sort -}}
@@ -118,4 +121,30 @@ func (sqlite SQLite) Quote(s string) string {
 // AutoIncrement return string for auto-increment setting
 func (sqlite SQLite) AutoIncrement() string {
 	return autoIncrement
+}
+
+// PrimaryKey is a model for determining the primary key
+type PrimaryKey struct {
+	columns []string
+}
+
+// AddPrimaryKey return initialized PrimaryKey struct.
+func AddPrimaryKey(columns ...string) PrimaryKey {
+	return PrimaryKey{
+		columns: columns,
+	}
+}
+
+// Columns returns the columns that will be the primary keys.
+func (pk PrimaryKey) Columns() []string {
+	return pk.columns
+}
+
+// ToSQL return primary key sql string.
+func (pk PrimaryKey) ToSQL() string {
+	var columnsStr []string
+	for _, c := range pk.columns {
+		columnsStr = append(columnsStr, query.Quote(c))
+	}
+	return fmt.Sprintf("PRIMARY KEY (%s)", strings.Join(columnsStr, ", "))
 }

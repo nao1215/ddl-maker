@@ -48,7 +48,7 @@ type SpatialIndex struct {
 	name    string
 }
 
-// PrimaryKey XXX
+// PrimaryKey is a model for determining the primary key
 type PrimaryKey struct {
 	columns []string
 }
@@ -319,7 +319,7 @@ func (si SpatialIndex) ToSQL() string {
 	return fmt.Sprintf("SPATIAL KEY %s (%s)", query.Quote(si.name), strings.Join(columnsStr, ", "))
 }
 
-// Columns XXX
+// Columns returns the columns that will be the primary keys.
 func (pk PrimaryKey) Columns() []string {
 	return pk.columns
 }
@@ -414,7 +414,7 @@ func AddSpatialIndex(idxName string, columns ...string) SpatialIndex {
 	}
 }
 
-// AddPrimaryKey XXX
+// AddPrimaryKey return initialized PrimaryKey struct.
 func AddPrimaryKey(columns ...string) PrimaryKey {
 	return PrimaryKey{
 		columns: columns,

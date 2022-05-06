@@ -23,8 +23,23 @@ func (sqlite SQLite) FooterTemplate() string {
 
 // TableTemplate return string that is sql table template
 func (sqlite SQLite) TableTemplate() string {
-	// TODO:
-	return ""
+	return `
+DROP TABLE IF EXISTS {{ .Name }};
+
+CREATE TABLE {{ .Name }} (
+    {{ range .Columns -}}
+        {{ .ToSQL }},
+    {{ end -}}
+    {{ range .ForeignKeys.Sort  -}}
+        {{ .ToSQL }},
+    {{ end -}}
+);
+
+{{ range .Indexes.Sort -}}
+    {{ .ToSQL }},
+{{ end -}}
+
+`
 }
 
 // ToSQL convert sqlite sql string from typeName and size
@@ -33,7 +48,7 @@ func (sqlite SQLite) ToSQL(typeName string, size uint64) (string, error) {
 	return "", nil
 }
 
-// Quote return string that encloses with ''.
+// Quote return string that encloses with ``.
 func (sqlite SQLite) Quote(s string) string {
 	return query.Quote(s)
 }

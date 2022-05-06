@@ -59,7 +59,23 @@ func TestSQLite_TableTemplate(t *testing.T) {
 		{
 			name:   "[Normal] return table",
 			sqlite: SQLite{},
-			want:   "",
+			want: `
+DROP TABLE IF EXISTS {{ .Name }};
+
+CREATE TABLE {{ .Name }} (
+    {{ range .Columns -}}
+        {{ .ToSQL }},
+    {{ end -}}
+    {{ range .ForeignKeys.Sort  -}}
+        {{ .ToSQL }},
+    {{ end -}}
+);
+
+{{ range .Indexes.Sort -}}
+    {{ .ToSQL }},
+{{ end -}}
+
+`,
 		},
 	}
 	for _, tt := range tests {

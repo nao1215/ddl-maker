@@ -5,19 +5,8 @@ import (
 	"testing"
 
 	"github.com/nao1215/ddl-maker/dialect/mysql"
+	"github.com/nao1215/ddl-maker/dialect/sqlite"
 )
-
-func TestNew(t *testing.T) {
-	_, err := New("", "", "")
-	if err == nil {
-		t.Fatal("error not set driver")
-	}
-
-	_, err = New("mysql", "", "")
-	if err != nil {
-		t.Fatalf("error new dialect:%s error", "mysql")
-	}
-}
 
 func TestSort(t *testing.T) {
 	var indexes Indexes
@@ -95,6 +84,63 @@ func TestForeignKeys_Sort(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.foreignKeys.Sort(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("ForeignKeys.Sort() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestNew(t *testing.T) {
+	type args struct {
+		driver  string
+		engine  string
+		charset string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    Dialect
+		wantErr bool
+	}{
+		{
+			name: "[Normal] return mysql dialect",
+			args: args{
+				driver:  "mysql",
+				engine:  "",
+				charset: "",
+			},
+			want:    &mysql.MySQL{},
+			wantErr: false,
+		},
+		{
+			name: "[Normal] return sqlite dialect",
+			args: args{
+				driver:  "sqlite",
+				engine:  "",
+				charset: "",
+			},
+			want:    &sqlite.SQLite{},
+			wantErr: false,
+		},
+		{
+			name: "[Error] no such driver",
+			args: args{
+				driver:  "unknown",
+				engine:  "",
+				charset: "",
+			},
+			want:    nil,
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := New(tt.args.driver, tt.args.engine, tt.args.charset)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("New() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("New() = %v, want %v", got, tt.want)
 			}
 		})
 	}

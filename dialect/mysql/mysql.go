@@ -267,12 +267,12 @@ func (ui UniqueIndex) ToSQL() string {
 	return fmt.Sprintf("UNIQUE %s (%s)", query.Quote(ui.name), strings.Join(columnsStr, ", "))
 }
 
-// Name XXX
+// Name return full text index name
 func (fi FullTextIndex) Name() string {
 	return fi.name
 }
 
-// Columns XXX
+// Columns return full text index columns
 func (fi FullTextIndex) Columns() []string {
 	return fi.columns
 }

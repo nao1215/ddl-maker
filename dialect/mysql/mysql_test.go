@@ -99,14 +99,6 @@ func TestToSQL2(t *testing.T) {
 	}
 }
 
-func TestQuote(t *testing.T) {
-	column := "id"
-
-	if quote(column) != "`id`" {
-		t.Fatalf("error %s quote. result:%s ", column, quote(column))
-	}
-}
-
 func TestAuotIncrement(t *testing.T) {
 	m := MySQL{}
 	if m.AutoIncrement() != autoIncrement {

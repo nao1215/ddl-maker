@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+
+	"github.com/nao1215/ddl-maker/query"
 )
 
 const (
@@ -15,7 +17,7 @@ const (
 // ErrInvalidType means Invalid type specified when parsing
 var ErrInvalidType = errors.New("Specified type is invalid")
 
-// MySQL XXX
+// MySQL is a model with database engine and character code for MySQL
 type MySQL struct {
 	Engine  string
 	Charset string
@@ -119,19 +121,19 @@ func WithDeleteForeignKeyOption(option ForeignKeyOptionType) ForeignKeyOption {
 	return withDeleteForeignKeyOption(option)
 }
 
-// HeaderTemplate XXX
+// HeaderTemplate return string that is sql header template
 func (mysql MySQL) HeaderTemplate() string {
 	return `SET foreign_key_checks=0;
 `
 }
 
-// FooterTemplate XXX
+// FooterTemplate return string that is sql footer template
 func (mysql MySQL) FooterTemplate() string {
 	return `SET foreign_key_checks=1;
 `
 }
 
-// TableTemplate XXX
+// TableTemplate return string that is sql table template
 func (mysql MySQL) TableTemplate() string {
 	return `
 DROP TABLE IF EXISTS {{ .Name }};
@@ -216,12 +218,12 @@ func (mysql MySQL) ToSQL(typeName string, size uint64) (string, error) {
 	}
 }
 
-// Quote XXX
+// Quote encloses the string with ''.
 func (mysql MySQL) Quote(s string) string {
-	return quote(s)
+	return query.Quote(s)
 }
 
-// AutoIncrement XXX
+// AutoIncrement return string for auto-increment setting
 func (mysql MySQL) AutoIncrement() string {
 	return autoIncrement
 }
@@ -241,10 +243,10 @@ func (i Index) ToSQL() string {
 	var columnsStr []string
 
 	for _, c := range i.columns {
-		columnsStr = append(columnsStr, quote(c))
+		columnsStr = append(columnsStr, query.Quote(c))
 	}
 
-	return fmt.Sprintf("INDEX %s (%s)", quote(i.name), strings.Join(columnsStr, ", "))
+	return fmt.Sprintf("INDEX %s (%s)", query.Quote(i.name), strings.Join(columnsStr, ", "))
 }
 
 // Name XXX
@@ -261,10 +263,10 @@ func (ui UniqueIndex) Columns() []string {
 func (ui UniqueIndex) ToSQL() string {
 	var columnsStr []string
 	for _, c := range ui.columns {
-		columnsStr = append(columnsStr, quote(c))
+		columnsStr = append(columnsStr, query.Quote(c))
 	}
 
-	return fmt.Sprintf("UNIQUE %s (%s)", quote(ui.name), strings.Join(columnsStr, ", "))
+	return fmt.Sprintf("UNIQUE %s (%s)", query.Quote(ui.name), strings.Join(columnsStr, ", "))
 }
 
 // Name XXX
@@ -287,12 +289,12 @@ func (fi FullTextIndex) WithParser(s string) FullTextIndex {
 func (fi FullTextIndex) ToSQL() string {
 	var columnsStr []string
 	for _, c := range fi.columns {
-		columnsStr = append(columnsStr, quote(c))
+		columnsStr = append(columnsStr, query.Quote(c))
 	}
 
-	sql := fmt.Sprintf("FULLTEXT %s (%s)", quote(fi.name), strings.Join(columnsStr, ", "))
+	sql := fmt.Sprintf("FULLTEXT %s (%s)", query.Quote(fi.name), strings.Join(columnsStr, ", "))
 	if fi.parser != "" {
-		sql += fmt.Sprintf(" WITH PARSER %s", quote(fi.parser))
+		sql += fmt.Sprintf(" WITH PARSER %s", query.Quote(fi.parser))
 	}
 	return sql
 }
@@ -311,10 +313,10 @@ func (si SpatialIndex) Columns() []string {
 func (si SpatialIndex) ToSQL() string {
 	var columnsStr []string
 	for _, c := range si.columns {
-		columnsStr = append(columnsStr, quote(c))
+		columnsStr = append(columnsStr, query.Quote(c))
 	}
 
-	return fmt.Sprintf("SPATIAL KEY %s (%s)", quote(si.name), strings.Join(columnsStr, ", "))
+	return fmt.Sprintf("SPATIAL KEY %s (%s)", query.Quote(si.name), strings.Join(columnsStr, ", "))
 }
 
 // Columns XXX
@@ -326,7 +328,7 @@ func (pk PrimaryKey) Columns() []string {
 func (pk PrimaryKey) ToSQL() string {
 	var columnsStr []string
 	for _, c := range pk.columns {
-		columnsStr = append(columnsStr, quote(c))
+		columnsStr = append(columnsStr, query.Quote(c))
 	}
 
 	return fmt.Sprintf("PRIMARY KEY (%s)", strings.Join(columnsStr, ", "))
@@ -361,14 +363,14 @@ func (fk ForeignKey) DeleteOption() string {
 func (fk ForeignKey) ToSQL() string {
 	var foreignColumnsStr, referenceColumnsStr []string
 	for _, fc := range fk.foreignColumns {
-		foreignColumnsStr = append(foreignColumnsStr, quote(fc))
+		foreignColumnsStr = append(foreignColumnsStr, query.Quote(fc))
 	}
 	for _, rc := range fk.referenceColumns {
-		referenceColumnsStr = append(referenceColumnsStr, quote(rc))
+		referenceColumnsStr = append(referenceColumnsStr, query.Quote(rc))
 	}
 	sql := fmt.Sprintf("FOREIGN KEY (%s) REFERENCES %s (%s)",
 		strings.Join(foreignColumnsStr, ", "),
-		quote(fk.referenceTableName),
+		query.Quote(fk.referenceTableName),
 		strings.Join(referenceColumnsStr, ", "))
 	if fk.deleteOption != "" {
 		sql = sql + fmt.Sprintf(" ON DELETE %s", fk.deleteOption)
@@ -458,8 +460,4 @@ func datetime(size uint64) string {
 	}
 
 	return fmt.Sprintf("DATETIME(%d)", size)
-}
-
-func quote(s string) string {
-	return fmt.Sprintf("`%s`", s)
 }

@@ -5,6 +5,7 @@ import (
 	"sort"
 
 	"github.com/nao1215/ddl-maker/dialect/mysql"
+	"github.com/nao1215/ddl-maker/dialect/sqlite"
 )
 
 // Dialect is interface that eliminates differences in DB drivers.
@@ -110,6 +111,8 @@ func New(driver, engine, charset string) (Dialect, error) {
 			Engine:  engine,
 			Charset: charset,
 		}
+	case "sqlite":
+		d = &sqlite.SQLite{}
 	default:
 		return d, fmt.Errorf("No such driver: %s", driver)
 	}

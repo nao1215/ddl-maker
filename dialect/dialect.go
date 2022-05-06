@@ -75,8 +75,10 @@ func (foreignKeys ForeignKeys) Sort() ForeignKeys {
 // Indexes is a slice of Indexes
 type Indexes []Index
 
-// Index is model representing indexes to speed up DB searches
+// Index is model representing indexes to speed up DB searches.
 type Index interface {
+	Name() string
+	Columns() []string
 	ToSQL() string
 }
 

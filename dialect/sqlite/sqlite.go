@@ -156,6 +156,16 @@ type Index struct {
 	name    string
 }
 
+// Name return index name
+func (i Index) Name() string {
+	return i.name
+}
+
+// Columns return index columns
+func (i Index) Columns() []string {
+	return i.columns
+}
+
 // ToSQL return index sql string
 func (i Index) ToSQL() string {
 	var columnsStr []string

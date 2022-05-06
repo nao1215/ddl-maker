@@ -228,13 +228,23 @@ func (mysql MySQL) AutoIncrement() string {
 	return autoIncrement
 }
 
+// Name return index name
+func (i Index) Name() string {
+	return i.name
+}
+
+// Columns return index columns
+func (i Index) Columns() []string {
+	return i.columns
+}
+
 // ToSQL return index sql string
 func (i Index) ToSQL() string {
 	var columnsStr []string
-	for _, c := range i.columns {
+	for _, c := range i.Columns() {
 		columnsStr = append(columnsStr, query.Quote(c))
 	}
-	return fmt.Sprintf("INDEX %s (%s)", query.Quote(i.name), strings.Join(columnsStr, ", "))
+	return fmt.Sprintf("INDEX %s (%s)", query.Quote(i.Name()), strings.Join(columnsStr, ", "))
 }
 
 // Name XXX

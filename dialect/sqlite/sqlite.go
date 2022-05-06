@@ -1,6 +1,14 @@
 package sqlite
 
-import "github.com/nao1215/ddl-maker/query"
+import (
+	"errors"
+	"fmt"
+
+	"github.com/nao1215/ddl-maker/query"
+)
+
+// ErrInvalidType means Invalid type specified when parsing
+var ErrInvalidType = errors.New("Specified type is invalid")
 
 const (
 	autoIncrement = "AUTOINCREMENT"
@@ -44,8 +52,62 @@ CREATE TABLE {{ .Name }} (
 
 // ToSQL convert sqlite sql string from typeName and size
 func (sqlite SQLite) ToSQL(typeName string, size uint64) (string, error) {
-	// TODO:
-	return "", nil
+	switch typeName {
+	case "int8", "*int8":
+		return "INTEGER", nil
+	case "int16", "*int16":
+		return "INTEGER", nil
+	case "int32", "*int32", "sql.NullInt32":
+		return "INTEGER", nil
+	case "int64", "*int64", "sql.NullInt64":
+		return "INTEGER", nil
+	case "uint8", "*uint8":
+		return "INTEGER", nil
+	case "uint16", "*uint16":
+		return "INTEGER", nil
+	case "uint32", "*uint32":
+		return "INTEGER", nil
+	case "uint64", "*uint64":
+		return "INTEGER", nil
+	case "float32", "*float32":
+		return "REAL", nil
+	case "float64", "*float64", "sql.NullFloat64":
+		return "REAL", nil
+	case "string", "*string", "sql.NullString":
+		return "TEXT", nil
+	case "[]uint8", "sql.RawBytes":
+		return "BLOB", nil
+	case "bool", "*bool", "sql.NullBool":
+		return "INTEGER", nil
+	case "tinytext":
+		return "TEXT", nil
+	case "text":
+		return "TEXT", nil
+	case "mediumtext":
+		return "TEXT", nil
+	case "longtext":
+		return "TEXT", nil
+	case "tinyblob":
+		return "BLOB", nil
+	case "blob":
+		return "BLOB", nil
+	case "mediumblob":
+		return "BLOB", nil
+	case "longblob":
+		return "BLOB", nil
+	case "time":
+		return "INTEGER", nil
+	case "time.Time", "*time.Time":
+		return "INTEGER", nil
+	case "sql.NullTime":
+		return "INTEGER", nil
+	case "date":
+		return "INTEGER", nil
+	case "json.RawMessage", "*json.RawMessage":
+		return "JSON", nil // from SQLite3.9
+	default:
+		return "", fmt.Errorf("%w: %s", ErrInvalidType, typeName)
+	}
 }
 
 // Quote return string that encloses with ``.

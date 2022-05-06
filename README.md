@@ -13,6 +13,11 @@
 # What is ddl-maker
 ddl-maker generate ddl (SQL file) from golang struct. It's only supported MySQL only now. The original code is [kayac/ddl-maker](https://github.com/kayac/ddl-maker) and this repository is a fork from it. nao1215/ddl-maker was not actively updated. I wanted to add features, add tests, and improve documentation. However, I wasn't sure if they would be merged. So, I decided to fork it and add our own features.
 
+## Support SQL Driver & Golang version
+
+- MySQL
+- SQLite
+- go version 1.18
 # How to use
 The following sample code uses two files.
 - `example.go` defining structures for DDL generation
@@ -287,29 +292,36 @@ SET foreign_key_checks=1;
 
 ___
 
-## Support SQL Driver
+## Type conversion table
 
-- MySQL
-
-
-## MySQL and Golang Type  Correspondence table
-
-|        Golang Type        |   MySQL Column    |
-| :------------------------ | :---------------- |
-|           int8            |      TINYINT      |
-|           int16           |     SMALLINT      |
-|           int32           |      INTGER       |
-|    int64, sql.NullInt64   |      BIGINT       |
-|           uint8           | TINYINT unsigned  |
-|           uint16          | SMALLINT unsigned |
-|           uint32          | INTEGER unsigned  |
-|           uint64          |  BIGINT unsigned  |
-|          float32          |       FLOAT       |
-| float64, sql.NullFloat64  |      DOUBLDE      |
-|  string, sql.NullString   |      VARCHAR      |
-|    bool, sql.NullBool     |    TINYINT(1)     |
-| time.Time, mysql.NullTime |     DATETIME      |
-|      json.RawMessage      |        JSON       |
+|        Golang Type        |   MySQL           |  SQLite     |
+| :------------------------ | :---------------- | :---------- |
+|           int8            |      TINYINT      |  INTEGER    |
+|           int16           |     SMALLINT      |  INTEGER    |
+|           int32           |      INTGER       |  INTEGER    |
+|    int64, sql.NullInt64   |      BIGINT       |  INTEGER    |
+|           uint8           | TINYINT unsigned  |  INTEGER    |
+|           uint16          | SMALLINT unsigned |  INTEGER    |
+|           uint32          | INTEGER unsigned  |  INTEGER    |
+|           uint64          |  BIGINT unsigned  |  INTEGER    |
+|          float32          |       FLOAT       |  REAL       |
+|          float64          |       FLOAT       |  REAL       |
+| []uint8, sql.RawByte      |    VARBINARY(N)   |  BLOB       |
+| float64, sql.NullFloat64  |      DOUBLDE      |  REAL       |
+|  string, sql.NullString   |      VARCHAR      |  TEXT       |
+|    bool, sql.NullBool     |    TINYINT(1)     | INTEGER     |
+| time.Time, mysql.NullTime |     DATETIME      |  INTEGER    |
+|            date           |        DATE       |  INTEGER    |
+|          tinytext         |     TINYTEXT      |  TEXT       |
+|           text            |       TEXT        |  TEXT       |
+|         mediumtext        |     MEDIUMTEXT    |  TEXT       |
+|          longtext         |     LONGTEXT      |  TEXT       |
+|          tinyblob         |     TINYBLOB      |  BLOB       |
+|             blob          |        BLOB       |  BLOB       |
+|       mediumblob          |    MEDIUMBLOB     |  BLOB       |
+|       longblob            |    LONGBLOB       |  BLOB       |
+|      json.RawMessage      |       JSON        |  JSON       |
+|           geometry        |     GEOMETRY      | Not support |
 
 [mysql.NullTime](https://godoc.org/github.com/go-sql-driver/mysql#NullTime) is from [github.com/go-sql-driver/mysql](https://github.com/go-sql-driver/mysql).
 

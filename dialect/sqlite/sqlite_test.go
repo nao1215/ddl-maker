@@ -101,11 +101,418 @@ func TestSQLite_ToSQL(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "[Normal] success to convert sql",
-			sqlite:  SQLite{},
-			args:    args{},
-			want:    "",
+			name:   "[Normal] int8 to INTEGER",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "int8",
+			},
+			want:    "INTEGER",
 			wantErr: false,
+		},
+		{
+			name:   "[Normal] *int8 to INTEGER",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "*int8",
+			},
+			want:    "INTEGER",
+			wantErr: false,
+		},
+		{
+			name:   "[Normal] int16 to INTEGER",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "int16",
+			},
+			want:    "INTEGER",
+			wantErr: false,
+		},
+		{
+			name:   "[Normal] int32 to INTEGER",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "int32",
+			},
+			want:    "INTEGER",
+			wantErr: false,
+		},
+		{
+			name:   "[Normal] *int32 to INTEGER",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "*int32",
+			},
+			want:    "INTEGER",
+			wantErr: false,
+		},
+		{
+			name:   "[Normal] sql.NullInt32 to INTEGER",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "sql.NullInt32",
+			},
+			want:    "INTEGER",
+			wantErr: false,
+		},
+		{
+			name:   "[Normal] int64 to INTEGER",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "int64",
+			},
+			want:    "INTEGER",
+			wantErr: false,
+		},
+		{
+			name:   "[Normal] *int64 to INTEGER",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "*int64",
+			},
+			want:    "INTEGER",
+			wantErr: false,
+		},
+		{
+			name:   "[Normal] sql.NullInt64 to INTEGER",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "sql.NullInt64",
+			},
+			want:    "INTEGER",
+			wantErr: false,
+		},
+		{
+			name:   "[Normal] uint8 to INTEGER",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "uint8",
+			},
+			want:    "INTEGER",
+			wantErr: false,
+		},
+		{
+			name:   "[Normal] *uint8 to INTEGER",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "*uint8",
+			},
+			want:    "INTEGER",
+			wantErr: false,
+		},
+		{
+			name:   "[Normal] uint16 to INTEGER",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "uint16",
+			},
+			want:    "INTEGER",
+			wantErr: false,
+		},
+		{
+			name:   "[Normal] *uint16 to INTEGER",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "*uint16",
+			},
+			want:    "INTEGER",
+			wantErr: false,
+		},
+		{
+			name:   "[Normal] uint32 to INTEGER",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "uint32",
+			},
+			want:    "INTEGER",
+			wantErr: false,
+		},
+		{
+			name:   "[Normal] *uint32 to INTEGER",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "*uint32",
+			},
+			want:    "INTEGER",
+			wantErr: false,
+		},
+		{
+			name:   "[Normal] uint64 to INTEGER",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "uint64",
+			},
+			want:    "INTEGER",
+			wantErr: false,
+		},
+		{
+			name:   "[Normal] *uint64 to INTEGER",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "*uint64",
+			},
+			want:    "INTEGER",
+			wantErr: false,
+		},
+		{
+			name:   "[Normal] float32 to REAL",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "float32",
+			},
+			want:    "REAL",
+			wantErr: false,
+		},
+		{
+			name:   "[Normal] *float32 to REAL",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "*float32",
+			},
+			want:    "REAL",
+			wantErr: false,
+		},
+		{
+			name:   "[Normal] float64 to REAL",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "float64",
+			},
+			want:    "REAL",
+			wantErr: false,
+		},
+		{
+			name:   "[Normal] *float64 to REAL",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "*float64",
+			},
+			want:    "REAL",
+			wantErr: false,
+		},
+		{
+			name:   "[Normal] sql.NullFloat64 to REAL",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "sql.NullFloat64",
+			},
+			want:    "REAL",
+			wantErr: false,
+		},
+		{
+			name:   "[Normal] string to TEXT",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "string",
+			},
+			want:    "TEXT",
+			wantErr: false,
+		},
+		{
+			name:   "[Normal] *string to TEXT",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "*string",
+			},
+			want:    "TEXT",
+			wantErr: false,
+		},
+		{
+			name:   "[Normal] sql.NullString to TEXT",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "sql.NullString",
+			},
+			want:    "TEXT",
+			wantErr: false,
+		},
+		{
+			name:   "[Normal] []uint8 to BLOB",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "[]uint8",
+			},
+			want:    "BLOB",
+			wantErr: false,
+		},
+		{
+			name:   "[Normal] sql.RawBytes to BLOB",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "sql.RawBytes",
+			},
+			want:    "BLOB",
+			wantErr: false,
+		},
+		{
+			name:   "[Normal] bool to INTEGER",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "bool",
+			},
+			want:    "INTEGER",
+			wantErr: false,
+		},
+		{
+			name:   "[Normal] *bool to INTEGER",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "*bool",
+			},
+			want:    "INTEGER",
+			wantErr: false,
+		},
+		{
+			name:   "[Normal] sql.NullBool to INTEGER",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "sql.NullBool",
+			},
+			want:    "INTEGER",
+			wantErr: false,
+		},
+		{
+			name:   "[Normal] text to TEXT",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "text",
+			},
+			want:    "TEXT",
+			wantErr: false,
+		},
+		{
+			name:   "[Normal] tinytext to TEXT",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "tinytext",
+			},
+			want:    "TEXT",
+			wantErr: false,
+		},
+		{
+			name:   "[Normal] mediumtext to TEXT",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "mediumtext",
+			},
+			want:    "TEXT",
+			wantErr: false,
+		},
+		{
+			name:   "[Normal] longtext to TEXT",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "longtext",
+			},
+			want:    "TEXT",
+			wantErr: false,
+		},
+		{
+			name:   "[Normal] tinyblob to BLOB",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "tinyblob",
+			},
+			want:    "BLOB",
+			wantErr: false,
+		},
+		{
+			name:   "[Normal] blob to BLOB",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "blob",
+			},
+			want:    "BLOB",
+			wantErr: false,
+		},
+		{
+			name:   "[Normal] mediumblob to BLOB",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "mediumblob",
+			},
+			want:    "BLOB",
+			wantErr: false,
+		},
+		{
+			name:   "[Normal] longblob to BLOB",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "longblob",
+			},
+			want:    "BLOB",
+			wantErr: false,
+		},
+		{
+			name:   "[Normal] time to INTEGER",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "time",
+			},
+			want:    "INTEGER",
+			wantErr: false,
+		},
+		{
+			name:   "[Normal] time.Time to INTEGER",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "time.Time",
+			},
+			want:    "INTEGER",
+			wantErr: false,
+		},
+		{
+			name:   "[Normal] *time.Time to INTEGER",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "*time.Time",
+			},
+			want:    "INTEGER",
+			wantErr: false,
+		},
+		{
+			name:   "[Normal] sql.NullTime to INTEGER",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "sql.NullTime",
+			},
+			want:    "INTEGER",
+			wantErr: false,
+		},
+		{
+			name:   "[Normal] date to INTEGER",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "date",
+			},
+			want:    "INTEGER",
+			wantErr: false,
+		},
+		{
+			name:   "[Normal] json.RawMessage to JSON",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "json.RawMessage",
+			},
+			want:    "JSON",
+			wantErr: false,
+		},
+		{
+			name:   "[Normal] *json.RawMessage to JSON",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "*json.RawMessage",
+			},
+			want:    "JSON",
+			wantErr: false,
+		},
+		{
+			name:   "[Error] can not convert geometry",
+			sqlite: SQLite{},
+			args: args{
+				typeName: "geometry",
+			},
+			want:    "",
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {

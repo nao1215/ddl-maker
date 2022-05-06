@@ -700,6 +700,40 @@ func TestIndex_Name(t *testing.T) {
 		})
 	}
 }
+func TestIndex_Table(t *testing.T) {
+	type fields struct {
+		columns []string
+		table   string
+		name    string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{
+			name: "[Normal] return index name",
+			fields: fields{
+				columns: []string{},
+				name:    "index name",
+				table:   "table name",
+			},
+			want: "table name",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			i := Index{
+				columns: tt.fields.columns,
+				table:   tt.fields.table,
+				name:    tt.fields.name,
+			}
+			if got := i.Table(); got != tt.want {
+				t.Errorf("Index.Table() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
 
 func TestIndex_Columns(t *testing.T) {
 	type fields struct {
@@ -763,6 +797,144 @@ func TestIndex_ToSQL(t *testing.T) {
 			}
 			if got := i.ToSQL(); got != tt.want {
 				t.Errorf("Index.ToSQL() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestUniqueIndex_Name(t *testing.T) {
+	type fields struct {
+		columns []string
+		table   string
+		name    string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{
+			name: "[Normal] return unique index name",
+			fields: fields{
+				columns: []string{},
+				name:    "unique index name",
+			},
+			want: "unique index name",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ui := UniqueIndex{
+				columns: tt.fields.columns,
+				table:   tt.fields.table,
+				name:    tt.fields.name,
+			}
+			if got := ui.Name(); got != tt.want {
+				t.Errorf("UniqueIndex.Name() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestUniqueIndex_Table(t *testing.T) {
+	type fields struct {
+		columns []string
+		table   string
+		name    string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{
+			name: "[Normal] return index name",
+			fields: fields{
+				columns: []string{},
+				name:    "index name",
+				table:   "table name",
+			},
+			want: "table name",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ui := UniqueIndex{
+				columns: tt.fields.columns,
+				table:   tt.fields.table,
+				name:    tt.fields.name,
+			}
+			if got := ui.Table(); got != tt.want {
+				t.Errorf("UniqueIndex.Table() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestUniqueIndex_Columns(t *testing.T) {
+	type fields struct {
+		columns []string
+		table   string
+		name    string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   []string
+	}{
+		{
+			name: "[Normal] return columns",
+			fields: fields{
+				columns: []string{"aa", "bb", "cc"},
+				name:    "index name",
+			},
+			want: []string{"aa", "bb", "cc"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ui := UniqueIndex{
+				columns: tt.fields.columns,
+				table:   tt.fields.table,
+				name:    tt.fields.name,
+			}
+			if got := ui.Columns(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("UniqueIndex.Columns() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestUniqueIndex_ToSQL(t *testing.T) {
+	type fields struct {
+		columns []string
+		table   string
+		name    string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{
+			name: "[Normal] return INDEX query",
+			fields: fields{
+				columns: []string{"aa", "bb", "cc"},
+				table:   "test_table",
+				name:    "test_index",
+			},
+			want: "CREATE UNIQUE INDEX `test_index` ON `test_table` (`aa`, `bb`, `cc`);",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ui := UniqueIndex{
+				columns: tt.fields.columns,
+				table:   tt.fields.table,
+				name:    tt.fields.name,
+			}
+			if got := ui.ToSQL(); got != tt.want {
+				t.Errorf("UniqueIndex.ToSQL() = %v, want %v", got, tt.want)
 			}
 		})
 	}

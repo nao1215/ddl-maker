@@ -29,7 +29,7 @@ type Index struct {
 	name    string
 }
 
-// UniqueIndex XXX
+// UniqueIndex is model that represents unique constraints
 type UniqueIndex struct {
 	columns []string
 	name    string
@@ -247,12 +247,12 @@ func (i Index) ToSQL() string {
 	return fmt.Sprintf("INDEX %s (%s)", query.Quote(i.Name()), strings.Join(columnsStr, ", "))
 }
 
-// Name XXX
+// Name return unique index name
 func (ui UniqueIndex) Name() string {
 	return ui.name
 }
 
-// Columns XXX
+// Columns return unique index columns
 func (ui UniqueIndex) Columns() []string {
 	return ui.columns
 }

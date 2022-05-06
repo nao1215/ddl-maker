@@ -161,6 +161,11 @@ func (i Index) Name() string {
 	return i.name
 }
 
+// Table return table name
+func (i Index) Table() string {
+	return i.table
+}
+
 // Columns return index columns
 func (i Index) Columns() []string {
 	return i.columns
@@ -170,10 +175,43 @@ func (i Index) Columns() []string {
 func (i Index) ToSQL() string {
 	var columnsStr []string
 
-	for _, c := range i.columns {
+	for _, c := range i.Columns() {
 		columnsStr = append(columnsStr, query.Quote(c))
 	}
 
 	return fmt.Sprintf("CREATE INDEX %s ON %s (%s);",
-		query.Quote(i.name), query.Quote(i.table), strings.Join(columnsStr, ", "))
+		query.Quote(i.Name()), query.Quote(i.Table()), strings.Join(columnsStr, ", "))
+}
+
+// UniqueIndex is model that represents unique constraints
+type UniqueIndex struct {
+	columns []string
+	table   string
+	name    string
+}
+
+// Name return unique index name
+func (ui UniqueIndex) Name() string {
+	return ui.name
+}
+
+// Table return table name
+func (ui UniqueIndex) Table() string {
+	return ui.table
+}
+
+// Columns return unique index columns
+func (ui UniqueIndex) Columns() []string {
+	return ui.columns
+}
+
+// ToSQL return unique unique index sql string
+func (ui UniqueIndex) ToSQL() string {
+	var columnsStr []string
+	for _, c := range ui.columns {
+		columnsStr = append(columnsStr, query.Quote(c))
+	}
+
+	return fmt.Sprintf("CREATE UNIQUE INDEX %s ON %s (%s);",
+		query.Quote(ui.Name()), query.Quote(ui.Table()), strings.Join(columnsStr, ", "))
 }

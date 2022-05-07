@@ -74,7 +74,7 @@ CREATE TABLE {{ .Name }} (
 );
 
 {{ range .Indexes.Sort -}}
-    {{ .ToSQL }},
+    {{ .ToSQL }}
 {{ end -}}
 
 `,
@@ -568,9 +568,9 @@ func TestSQLite_AutoIncrement(t *testing.T) {
 		want   string
 	}{
 		{
-			name:   "[Normal] return AUTOINCREMENT",
+			name:   "[Normal] return PRIMARY KEY AUTOINCREMENT",
 			sqlite: SQLite{},
-			want:   "AUTOINCREMENT",
+			want:   "PRIMARY KEY AUTOINCREMENT",
 		},
 	}
 	for _, tt := range tests {

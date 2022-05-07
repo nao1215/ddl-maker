@@ -12,7 +12,7 @@ import (
 var ErrInvalidType = errors.New("Specified type is invalid")
 
 const (
-	autoIncrement = "AUTOINCREMENT"
+	autoIncrement = "PRIMARY KEY AUTOINCREMENT"
 )
 
 // SQLite is a model with database engine and character code for SQLite
@@ -47,7 +47,7 @@ CREATE TABLE {{ .Name }} (
 );
 
 {{ range .Indexes.Sort -}}
-    {{ .ToSQL }},
+    {{ .ToSQL }}
 {{ end -}}
 
 `
@@ -187,7 +187,7 @@ func (i Index) Columns() []string {
 // ToSQL return index sql string
 func (i Index) ToSQL() string {
 	return fmt.Sprintf("CREATE INDEX %s ON %s (%s);",
-		i.Name(), i.Table(), strings.Join(i.Columns(), " "))
+		i.Name(), i.Table(), strings.Join(i.Columns(), ", "))
 }
 
 // UniqueIndex is model that represents unique constraints
@@ -228,7 +228,7 @@ func (ui UniqueIndex) Columns() []string {
 // ToSQL return unique unique index sql string
 func (ui UniqueIndex) ToSQL() string {
 	return fmt.Sprintf("CREATE UNIQUE INDEX %s ON %s (%s);",
-		ui.Name(), ui.Table(), strings.Join(ui.Columns(), " "))
+		ui.Name(), ui.Table(), strings.Join(ui.Columns(), ", "))
 }
 
 // ForeignKey is a model for setting foreign key constraints

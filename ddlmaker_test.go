@@ -13,6 +13,7 @@ import (
 	"github.com/nao1215/ddl-maker/dialect"
 	"github.com/nao1215/ddl-maker/dialect/mock"
 	"github.com/nao1215/ddl-maker/dialect/mysql"
+	"github.com/nao1215/ddl-maker/dialect/sqlite"
 )
 
 type TestOne struct {
@@ -211,7 +212,7 @@ CREATE TABLE %s (
 func TestGenerate2(t *testing.T) {
 	t.Run("[Normal] generate ddl file", func(t *testing.T) {
 		dm, err := New(Config{
-			OutFilePath: "./testdata/test.sql",
+			OutFilePath: "./testdata/mysql/test.sql",
 			DB: DBConfig{
 				Driver:  "mysql",
 				Engine:  "InnoDB",
@@ -221,7 +222,7 @@ func TestGenerate2(t *testing.T) {
 		if err != nil {
 			t.Fatal("error new maker", err)
 		}
-		defer os.Remove("./testdata/test.sql")
+		defer os.Remove("./testdata/mysql/test.sql")
 
 		if err = dm.AddStruct(&TestOne{}); err != nil {
 			t.Fatal("error add struct", err)
@@ -234,12 +235,12 @@ func TestGenerate2(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		got, err := os.ReadFile("./testdata/test.sql")
+		got, err := os.ReadFile("./testdata/mysql/test.sql")
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		want, err := os.ReadFile("./testdata/golden.sql")
+		want, err := os.ReadFile("./testdata/mysql/golden.sql")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -274,7 +275,7 @@ func TestGenerate2(t *testing.T) {
 
 	t.Run("[Error] generate ddl error", func(t *testing.T) {
 		dm, err := New(Config{
-			OutFilePath: "./testdata/test.sql",
+			OutFilePath: "./testdata/mysql/test.sql",
 			DB: DBConfig{
 				Driver:  "mysql",
 				Engine:  "InnoDB",
@@ -284,7 +285,7 @@ func TestGenerate2(t *testing.T) {
 		if err != nil {
 			t.Fatal("error new maker", err)
 		}
-		defer os.Remove("./testdata/test.sql")
+		defer os.Remove("./testdata/mysql/test.sql")
 
 		dm.Dialect = &mock.SQLMock{
 			Engine:  "dummy",
@@ -306,7 +307,7 @@ func TestGenerate2(t *testing.T) {
 
 	t.Run("[Error] template execute error", func(t *testing.T) {
 		dm, err := New(Config{
-			OutFilePath: "./testdata/test.sql",
+			OutFilePath: "./testdata/mysql/test.sql",
 			DB: DBConfig{
 				Driver:  "mysql",
 				Engine:  "InnoDB",
@@ -316,7 +317,7 @@ func TestGenerate2(t *testing.T) {
 		if err != nil {
 			t.Fatal("error new maker", err)
 		}
-		defer os.Remove("./testdata/test.sql")
+		defer os.Remove("./testdata/mysql/test.sql")
 
 		err = dm.AddStruct(&TestThree{})
 		if err != nil {
@@ -408,31 +409,91 @@ func TestDDLMaker_generate(t *testing.T) {
 	})
 }
 
-func TestDDLMaker_Generate(t *testing.T) {
-	type fields struct {
-		config  Config
-		Dialect dialect.Dialect
-		Structs []interface{}
-		Tables  []dialect.Table
+type User struct {
+	ID                  uint64
+	Name                string
+	CreatedAt           time.Time
+	UpdatedAt           time.Time
+	Token               string `ddl:"-"`
+	DailyNotificationAt string `ddl:"type=time"`
+}
+
+func (u *User) Table() string {
+	return "player"
+}
+
+func (u *User) PrimaryKey() dialect.PrimaryKey {
+	return mysql.AddPrimaryKey("id")
+}
+
+type Entry struct {
+	ID        int32
+	PlayerID  int32
+	Title     string  `ddl:"size=100"` // not used tag
+	Public    bool    `ddl:"default=0"`
+	Content   *string `ddl:"type=text"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+func (e Entry) PrimaryKey() dialect.PrimaryKey {
+	return sqlite.AddPrimaryKey("id")
+}
+
+func (e Entry) Indexes() dialect.Indexes {
+	return dialect.Indexes{
+		sqlite.AddUniqueIndex("created_at_uniq_idx", "entry", "created_at"),
+		sqlite.AddIndex("title_idx", "entry", "title"),
+		sqlite.AddIndex("created_at_idx", "entry", "created_at"),
 	}
-	tests := []struct {
-		name    string
-		fields  fields
-		wantErr bool
-	}{
-		// TODO: Add test cases.
+}
+
+func (e Entry) ForeignKeys() dialect.ForeignKeys {
+	return dialect.ForeignKeys{
+		sqlite.AddForeignKey(
+			[]string{"player_id"},
+			[]string{"id"},
+			"player",
+			sqlite.WithDeleteForeignKeyOption(sqlite.ForeignKeyOptionCascade),
+		),
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			dm := &DDLMaker{
-				config:  tt.fields.config,
-				Dialect: tt.fields.Dialect,
-				Structs: tt.fields.Structs,
-				Tables:  tt.fields.Tables,
-			}
-			if err := dm.Generate(); (err != nil) != tt.wantErr {
-				t.Errorf("DDLMaker.Generate() error = %v, wantErr %v", err, tt.wantErr)
-			}
+}
+
+func TestDDLMaker_GenerateForSQLite(t *testing.T) {
+	t.Run("[Normal] generate ddl file for SQLite", func(t *testing.T) {
+		dm, err := New(Config{
+			OutFilePath: "./testdata/sqlite/test.sql",
+			DB: DBConfig{
+				Driver:  "sqlite",
+				Engine:  "",
+				Charset: "",
+			},
 		})
-	}
+		if err != nil {
+			t.Fatal("error new maker", err)
+		}
+		defer os.Remove("./testdata/sqlite/test.sql")
+
+		if err = dm.AddStruct(&User{}, &Entry{}); err != nil {
+			t.Fatal("error add struct", err)
+		}
+
+		if err = dm.Generate(); err != nil {
+			t.Fatal(err)
+		}
+
+		got, err := os.ReadFile("./testdata/sqlite/test.sql")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		want, err := os.ReadFile("./testdata/sqlite/golden.sql")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if diff := cmp.Diff(string(want), string(got)); diff != "" {
+			t.Errorf("Compare value is mismatch (-want +got):%s\n", diff)
+		}
+	})
 }

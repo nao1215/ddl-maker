@@ -75,7 +75,7 @@ func (fkopt ForeignKeyOptionType) String() string {
 	return string(fkopt)
 }
 
-// ForeignKey XXX
+// ForeignKey is a model for setting foreign key constraints
 type ForeignKey struct {
 	foreignColumns     []string
 	referenceTableName string
@@ -84,18 +84,19 @@ type ForeignKey struct {
 	deleteOption       string
 }
 
-// ForeignKeyOption XXX
+// ForeignKeyOption is an interface for controlling foreign key constraint options.
 type ForeignKeyOption interface {
 	Apply(*ForeignKey)
 }
 
 type withUpdateForeignKeyOption string
 
+// Apply apply foreign key constraint options for Update.
 func (o withUpdateForeignKeyOption) Apply(f *ForeignKey) {
 	f.updateOption = string(o)
 }
 
-// WithUpdateForeignKeyOption XXX
+// WithUpdateForeignKeyOption return query that is the foreign key constraint options for Update.
 func WithUpdateForeignKeyOption(option ForeignKeyOptionType) ForeignKeyOption {
 	switch option {
 	// Specifying RESTRICT (or NO ACTION) is the same as omitting the ON DELETE or ON UPDATE clause.
@@ -107,11 +108,12 @@ func WithUpdateForeignKeyOption(option ForeignKeyOptionType) ForeignKeyOption {
 
 type withDeleteForeignKeyOption string
 
+// Apply apply foreign key constraint options for Delete.
 func (o withDeleteForeignKeyOption) Apply(f *ForeignKey) {
 	f.deleteOption = string(o)
 }
 
-// WithDeleteForeignKeyOption XXX
+// WithDeleteForeignKeyOption return query that is the foreign key constraint options for Delete.
 func WithDeleteForeignKeyOption(option ForeignKeyOptionType) ForeignKeyOption {
 	switch option {
 	// Specifying RESTRICT (or NO ACTION) is the same as omitting the ON DELETE or ON UPDATE clause.
@@ -342,17 +344,17 @@ func (fk ForeignKey) ReferenceTableName() string {
 	return fk.referenceTableName
 }
 
-// ReferenceColumns XXX
+// ReferenceColumns return slice of return foreign key columns
 func (fk ForeignKey) ReferenceColumns() []string {
 	return fk.referenceColumns
 }
 
-// UpdateOption XXX
+// UpdateOption return foreign key constraint option string for update
 func (fk ForeignKey) UpdateOption() string {
 	return fk.updateOption
 }
 
-// DeleteOption XXX
+// DeleteOption return foreign key constraint option string for delete
 func (fk ForeignKey) DeleteOption() string {
 	return fk.deleteOption
 }

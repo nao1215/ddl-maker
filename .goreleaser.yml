@@ -1,4 +1,4 @@
-project_name: gup
+project_name: ddl-maker
 env:
   - GO111MODULE=on
 before:
@@ -26,12 +26,3 @@ changelog:
     exclude:
       - "^docs:"
       - "^test:"
-nfpms:
-  - maintainer: Naohiro CHIKAMATSU <n.chika156@gmail.com>
-    description: ddl-maker generate ddl (SQL file) from Go struct.
-    homepage: https://github.com/nao1215/ddl-maker
-    license: Apache License 2.0
-    formats:
-      - deb
-      - rpm
-      - apk

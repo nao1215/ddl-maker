@@ -156,31 +156,38 @@ type Index struct {
 	name    string
 }
 
+// AddIndex returns a new Index
+func AddIndex(idxName, table string, columns ...string) Index {
+	return Index{
+		name:    idxName,
+		table:   table,
+		columns: columns,
+	}
+}
+
 // Name return index name
 func (i Index) Name() string {
-	return i.name
+	return query.Quote(i.name)
 }
 
 // Table return table name
 func (i Index) Table() string {
-	return i.table
+	return query.Quote(i.table)
 }
 
 // Columns return index columns
 func (i Index) Columns() []string {
-	return i.columns
+	var columnsStr []string
+	for _, c := range i.columns {
+		columnsStr = append(columnsStr, query.Quote(c))
+	}
+	return columnsStr
 }
 
 // ToSQL return index sql string
 func (i Index) ToSQL() string {
-	var columnsStr []string
-
-	for _, c := range i.Columns() {
-		columnsStr = append(columnsStr, query.Quote(c))
-	}
-
 	return fmt.Sprintf("CREATE INDEX %s ON %s (%s);",
-		query.Quote(i.Name()), query.Quote(i.Table()), strings.Join(columnsStr, ", "))
+		i.Name(), i.Table(), strings.Join(i.Columns(), ", "))
 }
 
 // UniqueIndex is model that represents unique constraints
@@ -190,28 +197,172 @@ type UniqueIndex struct {
 	name    string
 }
 
+// AddUniqueIndex returns a new UniqueIndex
+func AddUniqueIndex(idxName, table string, columns ...string) UniqueIndex {
+	return UniqueIndex{
+		name:    idxName,
+		table:   table,
+		columns: columns,
+	}
+}
+
 // Name return unique index name
 func (ui UniqueIndex) Name() string {
-	return ui.name
+	return query.Quote(ui.name)
 }
 
 // Table return table name
 func (ui UniqueIndex) Table() string {
-	return ui.table
+	return query.Quote(ui.table)
 }
 
 // Columns return unique index columns
 func (ui UniqueIndex) Columns() []string {
-	return ui.columns
-}
-
-// ToSQL return unique unique index sql string
-func (ui UniqueIndex) ToSQL() string {
 	var columnsStr []string
 	for _, c := range ui.columns {
 		columnsStr = append(columnsStr, query.Quote(c))
 	}
+	return columnsStr
+}
 
+// ToSQL return unique unique index sql string
+func (ui UniqueIndex) ToSQL() string {
 	return fmt.Sprintf("CREATE UNIQUE INDEX %s ON %s (%s);",
-		query.Quote(ui.Name()), query.Quote(ui.Table()), strings.Join(columnsStr, ", "))
+		ui.Name(), ui.Table(), strings.Join(ui.Columns(), ", "))
+}
+
+// ForeignKey is a model for setting foreign key constraints
+type ForeignKey struct {
+	foreignColumns     []string
+	referenceTableName string
+	referenceColumns   []string
+	updateOption       string
+	deleteOption       string
+}
+
+// ForeignKeyOptionType is string that means foreign key otion
+// https://www.sqlite.org/foreignkeys.html
+type ForeignKeyOptionType string
+
+// ForeignKeyOptionCascade CASCADE
+var ForeignKeyOptionCascade ForeignKeyOptionType = "CASCADE"
+
+// ForeignKeyOptionSetNull SET NULL
+var ForeignKeyOptionSetNull ForeignKeyOptionType = "SET NULL"
+
+// ForeignKeyOptionRestrict RESTRICT
+var ForeignKeyOptionRestrict ForeignKeyOptionType = "RESTRICT"
+
+// ForeignKeyOptionNoAction NO ACTION
+var ForeignKeyOptionNoAction ForeignKeyOptionType = "NO ACTION"
+
+// ForeignKeyOptionSetDefault SET DEFAULT
+var ForeignKeyOptionSetDefault ForeignKeyOptionType = "SET DEFAULT"
+
+// String Stringer for ForeignKeyOptionType
+func (fkopt ForeignKeyOptionType) String() string {
+	return string(fkopt)
+}
+
+// ForeignKeyOption is an interface for controlling foreign key constraint options.
+type ForeignKeyOption interface {
+	Apply(*ForeignKey)
+}
+
+type withUpdateForeignKeyOption string
+
+// Apply apply foreign key constraint options for Update.
+func (o withUpdateForeignKeyOption) Apply(f *ForeignKey) {
+	f.updateOption = string(o)
+}
+
+// WithUpdateForeignKeyOption manages the foreign key constraint options for Update.
+func WithUpdateForeignKeyOption(option ForeignKeyOptionType) ForeignKeyOption {
+	switch option {
+	// Specifying RESTRICT (or NO ACTION) is the same as omitting the ON DELETE or ON UPDATE clause.
+	case ForeignKeyOptionRestrict, ForeignKeyOptionNoAction:
+		return withUpdateForeignKeyOption("")
+	}
+	return withUpdateForeignKeyOption(option)
+}
+
+type withDeleteForeignKeyOption string
+
+// Apply apply foreign key constraint options for Delete.
+func (o withDeleteForeignKeyOption) Apply(f *ForeignKey) {
+	f.deleteOption = string(o)
+}
+
+// WithDeleteForeignKeyOption return query that is the foreign key constraint options for Delete.
+func WithDeleteForeignKeyOption(option ForeignKeyOptionType) ForeignKeyOption {
+	switch option {
+	// Specifying RESTRICT (or NO ACTION) is the same as omitting the ON DELETE or ON UPDATE clause.
+	case ForeignKeyOptionRestrict, ForeignKeyOptionNoAction:
+		return withDeleteForeignKeyOption("")
+	}
+	return withDeleteForeignKeyOption(option)
+}
+
+// AddForeignKey returns a new ForeignKey
+func AddForeignKey(foreignColumns, referenceColumns []string, referenceTableName string, option ...ForeignKeyOption) ForeignKey {
+	foreignKey := ForeignKey{
+		foreignColumns:     foreignColumns,
+		referenceTableName: referenceTableName,
+		referenceColumns:   referenceColumns,
+	}
+
+	for _, o := range option {
+		if o != nil {
+			o.Apply(&foreignKey)
+		}
+	}
+	return foreignKey
+}
+
+// ForeignColumns return slice of foreign key columns
+func (fk ForeignKey) ForeignColumns() []string {
+	var foreignColumnsStr []string
+	for _, fc := range fk.foreignColumns {
+		foreignColumnsStr = append(foreignColumnsStr, query.Quote(fc))
+	}
+	return foreignColumnsStr
+}
+
+// ReferenceTableName return reference table name
+func (fk ForeignKey) ReferenceTableName() string {
+	return query.Quote(fk.referenceTableName)
+}
+
+// ReferenceColumns return slice of return foreign key columns
+func (fk ForeignKey) ReferenceColumns() []string {
+	var referenceColumnsStr []string
+	for _, rc := range fk.referenceColumns {
+		referenceColumnsStr = append(referenceColumnsStr, query.Quote(rc))
+	}
+	return referenceColumnsStr
+}
+
+// UpdateOption return foreign key constraint option string for update
+func (fk ForeignKey) UpdateOption() string {
+	return fk.updateOption
+}
+
+// DeleteOption return foreign key constraint option string for delete
+func (fk ForeignKey) DeleteOption() string {
+	return fk.deleteOption
+}
+
+// ToSQL return foreign key sql string
+func (fk ForeignKey) ToSQL() string {
+	sql := fmt.Sprintf("FOREIGN KEY (%s) REFERENCES %s (%s)",
+		strings.Join(fk.ForeignColumns(), ", "),
+		fk.ReferenceTableName(),
+		strings.Join(fk.ReferenceColumns(), ", "))
+	if fk.DeleteOption() != "" {
+		sql = sql + fmt.Sprintf(" ON DELETE %s", fk.DeleteOption())
+	}
+	if fk.UpdateOption() != "" {
+		sql = sql + fmt.Sprintf(" ON UPDATE %s", fk.UpdateOption())
+	}
+	return sql
 }

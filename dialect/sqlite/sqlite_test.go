@@ -685,7 +685,7 @@ func TestIndex_Name(t *testing.T) {
 				columns: []string{},
 				name:    "index name",
 			},
-			want: "index name",
+			want: "`index name`",
 		},
 	}
 	for _, tt := range tests {
@@ -718,7 +718,7 @@ func TestIndex_Table(t *testing.T) {
 				name:    "index name",
 				table:   "table name",
 			},
-			want: "table name",
+			want: "`table name`",
 		},
 	}
 	for _, tt := range tests {
@@ -751,7 +751,7 @@ func TestIndex_Columns(t *testing.T) {
 				columns: []string{"aa", "bb", "cc"},
 				name:    "index name",
 			},
-			want: []string{"aa", "bb", "cc"},
+			want: []string{"`aa`", "`bb`", "`cc`"},
 		},
 	}
 	for _, tt := range tests {
@@ -819,7 +819,7 @@ func TestUniqueIndex_Name(t *testing.T) {
 				columns: []string{},
 				name:    "unique index name",
 			},
-			want: "unique index name",
+			want: "`unique index name`",
 		},
 	}
 	for _, tt := range tests {
@@ -848,13 +848,13 @@ func TestUniqueIndex_Table(t *testing.T) {
 		want   string
 	}{
 		{
-			name: "[Normal] return index name",
+			name: "[Normal] return table name",
 			fields: fields{
 				columns: []string{},
 				name:    "index name",
 				table:   "table name",
 			},
-			want: "table name",
+			want: "`table name`",
 		},
 	}
 	for _, tt := range tests {
@@ -888,7 +888,7 @@ func TestUniqueIndex_Columns(t *testing.T) {
 				columns: []string{"aa", "bb", "cc"},
 				name:    "index name",
 			},
-			want: []string{"aa", "bb", "cc"},
+			want: []string{"`aa`", "`bb`", "`cc`"},
 		},
 	}
 	for _, tt := range tests {
@@ -935,6 +935,381 @@ func TestUniqueIndex_ToSQL(t *testing.T) {
 			}
 			if got := ui.ToSQL(); got != tt.want {
 				t.Errorf("UniqueIndex.ToSQL() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestAddIndex(t *testing.T) {
+	type args struct {
+		idxName string
+		table   string
+		columns []string
+	}
+	tests := []struct {
+		name string
+		args args
+		want Index
+	}{
+		{
+			name: "[Normal] return new Index",
+			args: args{
+				idxName: "index_name",
+				table:   "index_table",
+				columns: []string{"aa", "bb", "cc"},
+			},
+			want: Index{
+				name:    "index_name",
+				table:   "index_table",
+				columns: []string{"aa", "bb", "cc"},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := AddIndex(tt.args.idxName, tt.args.table, tt.args.columns...); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("AddIndex() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestAddUniqueIndex(t *testing.T) {
+	type args struct {
+		idxName string
+		table   string
+		columns []string
+	}
+	tests := []struct {
+		name string
+		args args
+		want UniqueIndex
+	}{
+		{
+			name: "[Normal] return new UniqueIndex",
+			args: args{
+				idxName: "index_name",
+				table:   "index_table",
+				columns: []string{"aa", "bb", "cc"},
+			},
+			want: UniqueIndex{
+				name:    "index_name",
+				table:   "index_table",
+				columns: []string{"aa", "bb", "cc"},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := AddUniqueIndex(tt.args.idxName, tt.args.table, tt.args.columns...); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("AddUniqueIndex() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestForeignKeyOptionType_String(t *testing.T) {
+	tests := []struct {
+		name  string
+		fkopt ForeignKeyOptionType
+		want  string
+	}{
+		{
+			name:  "[Normal] convert ForeignKeyOptionType to string",
+			fkopt: ForeignKeyOptionNoAction,
+			want:  "NO ACTION",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.fkopt.String(); got != tt.want {
+				t.Errorf("ForeignKeyOptionType.String() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestAddForeignKey(t *testing.T) {
+	type args struct {
+		foreignColumns     []string
+		referenceColumns   []string
+		referenceTableName string
+		option             []ForeignKeyOption
+	}
+	tests := []struct {
+		name string
+		args args
+		want ForeignKey
+	}{
+		{
+			name: "[Normal] return new ForeignKey with option",
+			args: args{
+				foreignColumns:     []string{"aa", "bb"},
+				referenceColumns:   []string{"cc"},
+				referenceTableName: "ref",
+				option: []ForeignKeyOption{
+					WithDeleteForeignKeyOption(ForeignKeyOptionCascade),
+					WithUpdateForeignKeyOption(ForeignKeyOptionSetNull),
+				},
+			},
+			want: ForeignKey{
+				foreignColumns:     []string{"aa", "bb"},
+				referenceColumns:   []string{"cc"},
+				referenceTableName: "ref",
+				updateOption:       "SET NULL",
+				deleteOption:       "CASCADE",
+			},
+		},
+		{
+			name: "[Normal] return new ForeignKey without option",
+			args: args{
+				foreignColumns:     []string{"aa", "bb"},
+				referenceColumns:   []string{"cc"},
+				referenceTableName: "ref",
+				option: []ForeignKeyOption{
+					WithDeleteForeignKeyOption(ForeignKeyOptionNoAction),
+					WithUpdateForeignKeyOption(ForeignKeyOptionRestrict),
+				},
+			},
+			want: ForeignKey{
+				foreignColumns:     []string{"aa", "bb"},
+				referenceColumns:   []string{"cc"},
+				referenceTableName: "ref",
+				updateOption:       "",
+				deleteOption:       "",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := AddForeignKey(tt.args.foreignColumns, tt.args.referenceColumns, tt.args.referenceTableName, tt.args.option...); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("AddForeignKey() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestForeignKey_ForeignColumns(t *testing.T) {
+	type fields struct {
+		foreignColumns     []string
+		referenceTableName string
+		referenceColumns   []string
+		updateOption       string
+		deleteOption       string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   []string
+	}{
+		{
+			name: "[Normal] return foreign key column",
+			fields: fields{
+				foreignColumns: []string{"aa", "bb"},
+			},
+			want: []string{"`aa`", "`bb`"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fk := ForeignKey{
+				foreignColumns:     tt.fields.foreignColumns,
+				referenceTableName: tt.fields.referenceTableName,
+				referenceColumns:   tt.fields.referenceColumns,
+				updateOption:       tt.fields.updateOption,
+				deleteOption:       tt.fields.deleteOption,
+			}
+			if got := fk.ForeignColumns(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("ForeignKey.ForeignColumns() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestForeignKey_ReferenceColumns(t *testing.T) {
+	type fields struct {
+		foreignColumns     []string
+		referenceTableName string
+		referenceColumns   []string
+		updateOption       string
+		deleteOption       string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   []string
+	}{
+		{
+			name: "[Normal] return foreign key reference column",
+			fields: fields{
+				referenceColumns: []string{"aa", "bb"},
+			},
+			want: []string{"`aa`", "`bb`"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fk := ForeignKey{
+				foreignColumns:     tt.fields.foreignColumns,
+				referenceTableName: tt.fields.referenceTableName,
+				referenceColumns:   tt.fields.referenceColumns,
+				updateOption:       tt.fields.updateOption,
+				deleteOption:       tt.fields.deleteOption,
+			}
+			if got := fk.ReferenceColumns(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("ForeignKey.ReferenceColumns() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestForeignKey_ReferenceTableName(t *testing.T) {
+	type fields struct {
+		foreignColumns     []string
+		referenceTableName string
+		referenceColumns   []string
+		updateOption       string
+		deleteOption       string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{
+			name: "[Normal] return foreign key reference table",
+			fields: fields{
+				referenceTableName: "table",
+			},
+			want: "`table`",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fk := ForeignKey{
+				foreignColumns:     tt.fields.foreignColumns,
+				referenceTableName: tt.fields.referenceTableName,
+				referenceColumns:   tt.fields.referenceColumns,
+				updateOption:       tt.fields.updateOption,
+				deleteOption:       tt.fields.deleteOption,
+			}
+			if got := fk.ReferenceTableName(); got != tt.want {
+				t.Errorf("ForeignKey.ReferenceTableName() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestForeignKey_UpdateOption(t *testing.T) {
+	type fields struct {
+		foreignColumns     []string
+		referenceTableName string
+		referenceColumns   []string
+		updateOption       string
+		deleteOption       string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{
+			name: "[Normal] return string of foreign key update option",
+			fields: fields{
+				updateOption: "CASCADE",
+			},
+			want: "CASCADE",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fk := ForeignKey{
+				foreignColumns:     tt.fields.foreignColumns,
+				referenceTableName: tt.fields.referenceTableName,
+				referenceColumns:   tt.fields.referenceColumns,
+				updateOption:       tt.fields.updateOption,
+				deleteOption:       tt.fields.deleteOption,
+			}
+			if got := fk.UpdateOption(); got != tt.want {
+				t.Errorf("ForeignKey.UpdateOption() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestForeignKey_DeleteOption(t *testing.T) {
+	type fields struct {
+		foreignColumns     []string
+		referenceTableName string
+		referenceColumns   []string
+		updateOption       string
+		deleteOption       string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{
+			name: "[Normal] return string of foreign key delete option",
+			fields: fields{
+				deleteOption: "CASCADE",
+			},
+			want: "CASCADE",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fk := ForeignKey{
+				foreignColumns:     tt.fields.foreignColumns,
+				referenceTableName: tt.fields.referenceTableName,
+				referenceColumns:   tt.fields.referenceColumns,
+				updateOption:       tt.fields.updateOption,
+				deleteOption:       tt.fields.deleteOption,
+			}
+			if got := fk.DeleteOption(); got != tt.want {
+				t.Errorf("ForeignKey.DeleteOption() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestForeignKey_ToSQL(t *testing.T) {
+	type fields struct {
+		foreignColumns     []string
+		referenceTableName string
+		referenceColumns   []string
+		updateOption       string
+		deleteOption       string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{
+			name: "[Normal] return new ForeignKey with option",
+			fields: fields{
+				foreignColumns:     []string{"aa", "bb"},
+				referenceColumns:   []string{"cc"},
+				referenceTableName: "ref",
+				updateOption:       "CASCADE",
+				deleteOption:       "SET NULL",
+			},
+			want: "FOREIGN KEY (`aa`, `bb`) REFERENCES `ref` (`cc`) ON DELETE SET NULL ON UPDATE CASCADE",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fk := ForeignKey{
+				foreignColumns:     tt.fields.foreignColumns,
+				referenceTableName: tt.fields.referenceTableName,
+				referenceColumns:   tt.fields.referenceColumns,
+				updateOption:       tt.fields.updateOption,
+				deleteOption:       tt.fields.deleteOption,
+			}
+			if got := fk.ToSQL(); got != tt.want {
+				t.Errorf("ForeignKey.ToSQL() = %v, want %v", got, tt.want)
 			}
 		})
 	}

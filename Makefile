@@ -1,6 +1,5 @@
 .PHONY: build test clean vet fmt chkfmt
 
-APP         = gup
 GO          = go
 GO_BUILD    = $(GO) build
 GO_FORMAT   = $(GO) fmt
@@ -16,8 +15,7 @@ GO_PKGROOT  = ./...
 GO_PACKAGES = $(shell $(GO_LIST) $(GO_PKGROOT))
 
 clean: ## Clean project
-	-rm -rf $(APP) cover.out cover.html
-
+	-rm -rf cover.out cover.html
 
 test: ## Start test
 	env GOOS=$(GOOS) $(GO_TEST) -cover $(GO_PKGROOT) -coverprofile=cover.out

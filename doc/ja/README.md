@@ -7,6 +7,11 @@
 # ddl-makerとは
 ddl-makerは、Go言語の構造体からddl（SQLファイル）を生成します。現在は、MySQLのみをサポートしています。オリジナルコードは、[kayac/ddl-maker](https://github.com/kayac/ddl-maker)であり、本リポジトリはフォーク版です。nao1215/ddl-makerは、積極的な更新がされてきませんでした。私は、機能追加、テスト追加、ドキュメント改善を検討していました。しかし、それらの変更がマージされるかどうかは不確かでした。そこで、私はフォーク版で開発を進めることを決め、独自の機能追加を始めました。
 
+## サポート環境
+
+- MySQL
+- SQLite
+- go version 1.18
 # 使い方
 以下の例では、2つのファイルを用います。
 - `example.go`は、DDL生成用の構造体を定義します。
@@ -281,29 +286,36 @@ SET foreign_key_checks=1;
 
 ___
 
-## サポートするSQLドライバ
+## 型変換表
 
-- MySQL
-
-
-## MySQLとGolangにおける型変換表
-
-|        Golang Type        |   MySQL Column    |
-| :------------------------ | :---------------- |
-|           int8            |      TINYINT      |
-|           int16           |     SMALLINT      |
-|           int32           |      INTGER       |
-|    int64, sql.NullInt64   |      BIGINT       |
-|           uint8           | TINYINT unsigned  |
-|           uint16          | SMALLINT unsigned |
-|           uint32          | INTEGER unsigned  |
-|           uint64          |  BIGINT unsigned  |
-|          float32          |       FLOAT       |
-| float64, sql.NullFloat64  |      DOUBLDE      |
-|  string, sql.NullString   |      VARCHAR      |
-|    bool, sql.NullBool     |    TINYINT(1)     |
-| time.Time, mysql.NullTime |     DATETIME      |
-|      json.RawMessage      |        JSON       |
+|        Golang Type        |   MySQL           |  SQLite     |
+| :------------------------ | :---------------- | :---------- |
+|           int8            |      TINYINT      |  INTEGER    |
+|           int16           |     SMALLINT      |  INTEGER    |
+|           int32           |      INTGER       |  INTEGER    |
+|    int64, sql.NullInt64   |      BIGINT       |  INTEGER    |
+|           uint8           | TINYINT unsigned  |  INTEGER    |
+|           uint16          | SMALLINT unsigned |  INTEGER    |
+|           uint32          | INTEGER unsigned  |  INTEGER    |
+|           uint64          |  BIGINT unsigned  |  INTEGER    |
+|          float32          |       FLOAT       |  REAL       |
+|          float64          |       FLOAT       |  REAL       |
+| []uint8, sql.RawByte      |    VARBINARY(N)   |  BLOB       |
+| float64, sql.NullFloat64  |      DOUBLDE      |  REAL       |
+|  string, sql.NullString   |      VARCHAR      |  TEXT       |
+|    bool, sql.NullBool     |    TINYINT(1)     | INTEGER     |
+| time.Time, mysql.NullTime |     DATETIME      |  INTEGER    |
+|            date           |        DATE       |  INTEGER    |
+|          tinytext         |     TINYTEXT      |  TEXT       |
+|           text            |       TEXT        |  TEXT       |
+|         mediumtext        |     MEDIUMTEXT    |  TEXT       |
+|          longtext         |     LONGTEXT      |  TEXT       |
+|          tinyblob         |     TINYBLOB      |  BLOB       |
+|             blob          |        BLOB       |  BLOB       |
+|       mediumblob          |    MEDIUMBLOB     |  BLOB       |
+|       longblob            |    LONGBLOB       |  BLOB       |
+|      json.RawMessage      |       JSON        |  JSON       |
+|           geometry        |     GEOMETRY      | Not support |
 
 [mysql.NullTime](https://godoc.org/github.com/go-sql-driver/mysql#NullTime)は、[github.com/go-sql-driver/mysql](https://github.com/go-sql-driver/mysql)で定義されています。
 

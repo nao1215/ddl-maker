@@ -5,6 +5,7 @@ import (
 	"sort"
 
 	"github.com/nao1215/ddl-maker/dialect/mysql"
+	"github.com/nao1215/ddl-maker/dialect/sqlite"
 )
 
 // Dialect is interface that eliminates differences in DB drivers.
@@ -33,7 +34,7 @@ type Column interface {
 	ToSQL() (string, error)
 }
 
-// PrimaryKey XXX
+// PrimaryKey is a model for determining the primary key
 type PrimaryKey interface {
 	Columns() []string
 	ToSQL() string
@@ -71,10 +72,10 @@ func (foreignKeys ForeignKeys) Sort() ForeignKeys {
 	return sortForeignKeys
 }
 
-// Indexes XXX
+// Indexes is a slice of Indexes
 type Indexes []Index
 
-// Index XXX
+// Index is model representing indexes to speed up DB searches.
 type Index interface {
 	Name() string
 	Columns() []string
@@ -110,6 +111,8 @@ func New(driver, engine, charset string) (Dialect, error) {
 			Engine:  engine,
 			Charset: charset,
 		}
+	case "sqlite":
+		d = &sqlite.SQLite{}
 	default:
 		return d, fmt.Errorf("No such driver: %s", driver)
 	}

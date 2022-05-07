@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+
+	"github.com/nao1215/ddl-maker/query"
 )
 
 const (
@@ -15,7 +17,7 @@ const (
 // ErrInvalidType means Invalid type specified when parsing
 var ErrInvalidType = errors.New("Specified type is invalid")
 
-// MySQL XXX
+// MySQL is a model with database engine and character code for MySQL
 type MySQL struct {
 	Engine  string
 	Charset string
@@ -27,7 +29,7 @@ type Index struct {
 	name    string
 }
 
-// UniqueIndex XXX
+// UniqueIndex is model that represents unique constraints
 type UniqueIndex struct {
 	columns []string
 	name    string
@@ -46,7 +48,7 @@ type SpatialIndex struct {
 	name    string
 }
 
-// PrimaryKey XXX
+// PrimaryKey is a model for determining the primary key
 type PrimaryKey struct {
 	columns []string
 }
@@ -73,7 +75,7 @@ func (fkopt ForeignKeyOptionType) String() string {
 	return string(fkopt)
 }
 
-// ForeignKey XXX
+// ForeignKey is a model for setting foreign key constraints
 type ForeignKey struct {
 	foreignColumns     []string
 	referenceTableName string
@@ -82,18 +84,19 @@ type ForeignKey struct {
 	deleteOption       string
 }
 
-// ForeignKeyOption XXX
+// ForeignKeyOption is an interface for controlling foreign key constraint options.
 type ForeignKeyOption interface {
 	Apply(*ForeignKey)
 }
 
 type withUpdateForeignKeyOption string
 
+// Apply apply foreign key constraint options for Update.
 func (o withUpdateForeignKeyOption) Apply(f *ForeignKey) {
 	f.updateOption = string(o)
 }
 
-// WithUpdateForeignKeyOption XXX
+// WithUpdateForeignKeyOption return query that is the foreign key constraint options for Update.
 func WithUpdateForeignKeyOption(option ForeignKeyOptionType) ForeignKeyOption {
 	switch option {
 	// Specifying RESTRICT (or NO ACTION) is the same as omitting the ON DELETE or ON UPDATE clause.
@@ -105,11 +108,12 @@ func WithUpdateForeignKeyOption(option ForeignKeyOptionType) ForeignKeyOption {
 
 type withDeleteForeignKeyOption string
 
+// Apply apply foreign key constraint options for Delete.
 func (o withDeleteForeignKeyOption) Apply(f *ForeignKey) {
 	f.deleteOption = string(o)
 }
 
-// WithDeleteForeignKeyOption XXX
+// WithDeleteForeignKeyOption return query that is the foreign key constraint options for Delete.
 func WithDeleteForeignKeyOption(option ForeignKeyOptionType) ForeignKeyOption {
 	switch option {
 	// Specifying RESTRICT (or NO ACTION) is the same as omitting the ON DELETE or ON UPDATE clause.
@@ -119,19 +123,19 @@ func WithDeleteForeignKeyOption(option ForeignKeyOptionType) ForeignKeyOption {
 	return withDeleteForeignKeyOption(option)
 }
 
-// HeaderTemplate XXX
+// HeaderTemplate return string that is sql header template
 func (mysql MySQL) HeaderTemplate() string {
 	return `SET foreign_key_checks=0;
 `
 }
 
-// FooterTemplate XXX
+// FooterTemplate return string that is sql footer template
 func (mysql MySQL) FooterTemplate() string {
 	return `SET foreign_key_checks=1;
 `
 }
 
-// TableTemplate XXX
+// TableTemplate return string that is sql table template
 func (mysql MySQL) TableTemplate() string {
 	return `
 DROP TABLE IF EXISTS {{ .Name }};
@@ -216,22 +220,22 @@ func (mysql MySQL) ToSQL(typeName string, size uint64) (string, error) {
 	}
 }
 
-// Quote XXX
+// Quote encloses the string with ``.
 func (mysql MySQL) Quote(s string) string {
-	return quote(s)
+	return query.Quote(s)
 }
 
-// AutoIncrement XXX
+// AutoIncrement return string for auto-increment setting
 func (mysql MySQL) AutoIncrement() string {
 	return autoIncrement
 }
 
-// Name XXX
+// Name return index name
 func (i Index) Name() string {
 	return i.name
 }
 
-// Columns XXX
+// Columns return index columns
 func (i Index) Columns() []string {
 	return i.columns
 }
@@ -239,20 +243,18 @@ func (i Index) Columns() []string {
 // ToSQL return index sql string
 func (i Index) ToSQL() string {
 	var columnsStr []string
-
-	for _, c := range i.columns {
-		columnsStr = append(columnsStr, quote(c))
+	for _, c := range i.Columns() {
+		columnsStr = append(columnsStr, query.Quote(c))
 	}
-
-	return fmt.Sprintf("INDEX %s (%s)", quote(i.name), strings.Join(columnsStr, ", "))
+	return fmt.Sprintf("INDEX %s (%s)", query.Quote(i.Name()), strings.Join(columnsStr, ", "))
 }
 
-// Name XXX
+// Name return unique index name
 func (ui UniqueIndex) Name() string {
 	return ui.name
 }
 
-// Columns XXX
+// Columns return unique index columns
 func (ui UniqueIndex) Columns() []string {
 	return ui.columns
 }
@@ -261,18 +263,18 @@ func (ui UniqueIndex) Columns() []string {
 func (ui UniqueIndex) ToSQL() string {
 	var columnsStr []string
 	for _, c := range ui.columns {
-		columnsStr = append(columnsStr, quote(c))
+		columnsStr = append(columnsStr, query.Quote(c))
 	}
 
-	return fmt.Sprintf("UNIQUE %s (%s)", quote(ui.name), strings.Join(columnsStr, ", "))
+	return fmt.Sprintf("UNIQUE %s (%s)", query.Quote(ui.name), strings.Join(columnsStr, ", "))
 }
 
-// Name XXX
+// Name return full text index name
 func (fi FullTextIndex) Name() string {
 	return fi.name
 }
 
-// Columns XXX
+// Columns return full text index columns
 func (fi FullTextIndex) Columns() []string {
 	return fi.columns
 }
@@ -287,12 +289,12 @@ func (fi FullTextIndex) WithParser(s string) FullTextIndex {
 func (fi FullTextIndex) ToSQL() string {
 	var columnsStr []string
 	for _, c := range fi.columns {
-		columnsStr = append(columnsStr, quote(c))
+		columnsStr = append(columnsStr, query.Quote(c))
 	}
 
-	sql := fmt.Sprintf("FULLTEXT %s (%s)", quote(fi.name), strings.Join(columnsStr, ", "))
+	sql := fmt.Sprintf("FULLTEXT %s (%s)", query.Quote(fi.name), strings.Join(columnsStr, ", "))
 	if fi.parser != "" {
-		sql += fmt.Sprintf(" WITH PARSER %s", quote(fi.parser))
+		sql += fmt.Sprintf(" WITH PARSER %s", query.Quote(fi.parser))
 	}
 	return sql
 }
@@ -311,13 +313,13 @@ func (si SpatialIndex) Columns() []string {
 func (si SpatialIndex) ToSQL() string {
 	var columnsStr []string
 	for _, c := range si.columns {
-		columnsStr = append(columnsStr, quote(c))
+		columnsStr = append(columnsStr, query.Quote(c))
 	}
 
-	return fmt.Sprintf("SPATIAL KEY %s (%s)", quote(si.name), strings.Join(columnsStr, ", "))
+	return fmt.Sprintf("SPATIAL KEY %s (%s)", query.Quote(si.name), strings.Join(columnsStr, ", "))
 }
 
-// Columns XXX
+// Columns returns the columns that will be the primary keys.
 func (pk PrimaryKey) Columns() []string {
 	return pk.columns
 }
@@ -326,7 +328,7 @@ func (pk PrimaryKey) Columns() []string {
 func (pk PrimaryKey) ToSQL() string {
 	var columnsStr []string
 	for _, c := range pk.columns {
-		columnsStr = append(columnsStr, quote(c))
+		columnsStr = append(columnsStr, query.Quote(c))
 	}
 
 	return fmt.Sprintf("PRIMARY KEY (%s)", strings.Join(columnsStr, ", "))
@@ -342,17 +344,17 @@ func (fk ForeignKey) ReferenceTableName() string {
 	return fk.referenceTableName
 }
 
-// ReferenceColumns XXX
+// ReferenceColumns return slice of return foreign key columns
 func (fk ForeignKey) ReferenceColumns() []string {
 	return fk.referenceColumns
 }
 
-// UpdateOption XXX
+// UpdateOption return foreign key constraint option string for update
 func (fk ForeignKey) UpdateOption() string {
 	return fk.updateOption
 }
 
-// DeleteOption XXX
+// DeleteOption return foreign key constraint option string for delete
 func (fk ForeignKey) DeleteOption() string {
 	return fk.deleteOption
 }
@@ -361,14 +363,14 @@ func (fk ForeignKey) DeleteOption() string {
 func (fk ForeignKey) ToSQL() string {
 	var foreignColumnsStr, referenceColumnsStr []string
 	for _, fc := range fk.foreignColumns {
-		foreignColumnsStr = append(foreignColumnsStr, quote(fc))
+		foreignColumnsStr = append(foreignColumnsStr, query.Quote(fc))
 	}
 	for _, rc := range fk.referenceColumns {
-		referenceColumnsStr = append(referenceColumnsStr, quote(rc))
+		referenceColumnsStr = append(referenceColumnsStr, query.Quote(rc))
 	}
 	sql := fmt.Sprintf("FOREIGN KEY (%s) REFERENCES %s (%s)",
 		strings.Join(foreignColumnsStr, ", "),
-		quote(fk.referenceTableName),
+		query.Quote(fk.referenceTableName),
 		strings.Join(referenceColumnsStr, ", "))
 	if fk.deleteOption != "" {
 		sql = sql + fmt.Sprintf(" ON DELETE %s", fk.deleteOption)
@@ -380,7 +382,7 @@ func (fk ForeignKey) ToSQL() string {
 
 }
 
-// AddIndex XXX
+// AddIndex returns a new Index
 func AddIndex(idxName string, columns ...string) Index {
 	return Index{
 		name:    idxName,
@@ -388,7 +390,7 @@ func AddIndex(idxName string, columns ...string) Index {
 	}
 }
 
-// AddUniqueIndex XXX
+// AddUniqueIndex returns a new UniqueIndex
 func AddUniqueIndex(idxName string, columns ...string) UniqueIndex {
 	return UniqueIndex{
 		name:    idxName,
@@ -396,7 +398,7 @@ func AddUniqueIndex(idxName string, columns ...string) UniqueIndex {
 	}
 }
 
-// AddFullTextIndex XXX
+// AddFullTextIndex returns a new FullTextIndex
 func AddFullTextIndex(idxName string, columns ...string) FullTextIndex {
 	return FullTextIndex{
 		name:    idxName,
@@ -404,7 +406,7 @@ func AddFullTextIndex(idxName string, columns ...string) FullTextIndex {
 	}
 }
 
-// AddSpatialIndex XXX
+// AddSpatialIndex returns a new SpatialIndex
 func AddSpatialIndex(idxName string, columns ...string) SpatialIndex {
 	return SpatialIndex{
 		name:    idxName,
@@ -412,14 +414,14 @@ func AddSpatialIndex(idxName string, columns ...string) SpatialIndex {
 	}
 }
 
-// AddPrimaryKey XXX
+// AddPrimaryKey return initialized PrimaryKey struct.
 func AddPrimaryKey(columns ...string) PrimaryKey {
 	return PrimaryKey{
 		columns: columns,
 	}
 }
 
-// AddForeignKey XXX
+// AddForeignKey returns a new ForeignKey
 func AddForeignKey(foreignColumns, referenceColumns []string, referenceTableName string, option ...ForeignKeyOption) ForeignKey {
 	foreignKey := ForeignKey{
 		foreignColumns:     foreignColumns,
@@ -458,8 +460,4 @@ func datetime(size uint64) string {
 	}
 
 	return fmt.Sprintf("DATETIME(%d)", size)
-}
-
-func quote(s string) string {
-	return fmt.Sprintf("`%s`", s)
 }

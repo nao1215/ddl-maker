@@ -380,7 +380,7 @@ func (fk ForeignKey) ToSQL() string {
 
 }
 
-// AddIndex XXX
+// AddIndex returns a new Index
 func AddIndex(idxName string, columns ...string) Index {
 	return Index{
 		name:    idxName,
@@ -388,7 +388,7 @@ func AddIndex(idxName string, columns ...string) Index {
 	}
 }
 
-// AddUniqueIndex XXX
+// AddUniqueIndex returns a new UniqueIndex
 func AddUniqueIndex(idxName string, columns ...string) UniqueIndex {
 	return UniqueIndex{
 		name:    idxName,
@@ -396,7 +396,7 @@ func AddUniqueIndex(idxName string, columns ...string) UniqueIndex {
 	}
 }
 
-// AddFullTextIndex XXX
+// AddFullTextIndex returns a new FullTextIndex
 func AddFullTextIndex(idxName string, columns ...string) FullTextIndex {
 	return FullTextIndex{
 		name:    idxName,
@@ -404,7 +404,7 @@ func AddFullTextIndex(idxName string, columns ...string) FullTextIndex {
 	}
 }
 
-// AddSpatialIndex XXX
+// AddSpatialIndex returns a new SpatialIndex
 func AddSpatialIndex(idxName string, columns ...string) SpatialIndex {
 	return SpatialIndex{
 		name:    idxName,
@@ -419,7 +419,7 @@ func AddPrimaryKey(columns ...string) PrimaryKey {
 	}
 }
 
-// AddForeignKey XXX
+// AddForeignKey returns a new ForeignKey
 func AddForeignKey(foreignColumns, referenceColumns []string, referenceTableName string, option ...ForeignKeyOption) ForeignKey {
 	foreignKey := ForeignKey{
 		foreignColumns:     foreignColumns,
